@@ -1,0 +1,19 @@
+#!/bin/bash
+
+COUNTING="detailed"
+VERBOSE=0
+WORKSPACE=${WORKSPACE-".."}
+MISC_DIR="${WORKSPACE-"."}/build-tools"
+
+headers=$(
+  find ${WORKSPACE}/snow-fox-daemon/include -name "*.h" -o -name "*.inc.h"
+)
+sources=$(find ${WORKSPACE}/snow-fox-daemon/src -name "*.cpp")
+
+python "${MISC_DIR}/cpplint.py"                                        \
+  --verbose=${VERBOSE} --counting=${COUNTING} --output=vs7             \
+  --root="${WORKSPACE}/snow-fox-daemon/include" ${headers} ${sources}
+
+# Exit 0 to prevent C++ Lint from failing the build.
+exit 0
+
