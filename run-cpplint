@@ -3,7 +3,7 @@
 COUNTING="detailed"
 VERBOSE=0
 WORKSPACE=${WORKSPACE-".."}
-MISC_DIR="${WORKSPACE-"."}/build-tools"
+MISC_DIR="${WORKSPACE}/build-tools"
 
 headers=$(
   find ${WORKSPACE}/snow-fox-daemon/include -name "*.h" -o -name "*.inc.h"
@@ -16,4 +16,3 @@ python "${MISC_DIR}/cpplint.py"                                        \
 
 # Exit 0 to prevent C++ Lint from failing the build.
 exit 0
-
