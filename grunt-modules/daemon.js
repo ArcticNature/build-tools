@@ -18,13 +18,17 @@ module.exports = function(grunt_module) {
   grunt_module.configure("clean", "daemon.build", "snow-fox-daemon/build");
   grunt_module.configure("clean", "daemon.dist", "snow-fox-daemon/dist");
   grunt_module.configure("clean", "daemon.jenkins", [
-    "snow-fox-daemon/coverage.xml", "snow-fox-daemon/test-results.xml"
+    "snow-fox-daemon/coverage.xml",
+    "snow-fox-daemon/cppcheck.xml",
+    "snow-fox-daemon/test-results.xml"
   ]);
 
   grunt_module.aliasMore("clean:build", "clean:daemon.build");
   grunt_module.aliasMore("clean:dist", "clean:daemon.dist");
   grunt_module.alias("clean:daemon", [
-    "clean:daemon.build", "clean:daemon.dist", "clean:daemon.jenkins"
+    "clean:daemon.build",
+    "clean:daemon.dist",
+    "clean:daemon.jenkins"
   ]);
 
 
@@ -54,11 +58,24 @@ module.exports = function(grunt_module) {
       "snow-fox-daemon/src/**/*.cpp"
     ]
   });
+  grunt_module.configure("cppcheck", "daemon", {
+    exclude: ["3rd-parties", "snow-fox-daemon/tests"],
+    include: ["snow-fox-daemon/include", "3rd-parties/include"],
+    save_to: "snow-fox-daemon/cppcheck.xml",
+    src: [
+      "snow-fox-daemon/include/**/*.h",
+      "snow-fox-daemon/src/**/*.cpp"
+    ]
+  });
 
   grunt_module.aliasMore("jenkins", "jenkins:daemon");
   grunt_module.alias("jenkins:daemon", [
-    "clean:daemon.jenkins", "shell:daemon:Test", "shell:daemon.jenkins.test",
-    "shell:daemon.jenkins.coverge", "cpplint:daemon"
+    "clean:daemon.jenkins",
+    "shell:daemon:Test",
+    "shell:daemon.jenkins.test",
+    "shell:daemon.jenkins.coverge",
+    "cpplint:daemon",
+    "cppcheck:daemon"
   ]);
 
 
@@ -78,5 +95,8 @@ module.exports = function(grunt_module) {
   });
   daemon_shell("daemon.test", "dist/Test/test");
   grunt_module.aliasMore("test", "test:daemon");
-  grunt_module.alias("test:daemon", ["make:daemon.test", "shell:daemon.test"]);
+  grunt_module.alias("test:daemon", [
+    "make:daemon.test",
+    "shell:daemon.test"
+  ]);
 };
