@@ -71,9 +71,9 @@ module.exports = function(grunt_module) {
   grunt_module.aliasMore("jenkins", "jenkins:daemon");
   grunt_module.alias("jenkins:daemon", [
     "clean:daemon.jenkins",
-    "shell:daemon:Test",
+    "make:daemon.test",
     "shell:daemon.jenkins.test",
-    "shell:daemon.jenkins.coverge",
+    "shell:daemon.jenkins.coverage",
     "cpplint:daemon",
     "cppcheck:daemon"
   ]);
