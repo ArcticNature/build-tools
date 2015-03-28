@@ -16,7 +16,7 @@ module.exports = function(grunt_module) {
 
   // Clean tasks.
   grunt_module.configure("clean", "daemon.build", "snow-fox-daemon/build");
-  grunt_module.configure("clean", "daemon.dist", "snow-fox-daemon/dist");
+  grunt_module.configure("clean", "daemon.dist",  "snow-fox-daemon/dist");
   grunt_module.configure("clean", "daemon.jenkins", [
     "snow-fox-daemon/coverage.xml",
     "snow-fox-daemon/cppcheck.xml",
