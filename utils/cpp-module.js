@@ -109,13 +109,20 @@ var CppModuleGenerator = module.exports = function CppModuleGenerator(
     objects: "build/Test/GNU-Linux-x86/code/src",
     save_to: opts.path + "coverage.xml"
   });
+
   grunt_module.configure("cpplint", opts.name, {
-    options: { root: opts.code + "include" },
+    options: {
+      filter: [
+        "-runtime/indentation_namespace"
+      ],
+      root: opts.code + "include"
+    },
     src: [
       opts.code + "/include/**/*.h",
       opts.code + "/src/**/*.cpp"
     ]
   });
+
   grunt_module.configure("cppcheck", opts.name, {
     exclude: ["3rd-parties", opts.code + "/tests"],
     include: [opts.code + "/include", "3rd-parties/include"],

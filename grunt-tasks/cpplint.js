@@ -12,6 +12,9 @@ module.exports = function(grunt) {
       "--root=" + options.root,
       "--verbose=" + options.verbose
     ];
+    if (Array.isArray(options.filter)) {
+      args.push("--filter=" + options.filter.join(","));
+    }
     args.push.apply(args, files);
 
     // Spawn command.
