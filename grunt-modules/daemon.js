@@ -11,13 +11,7 @@ module.exports = function(grunt_module) {
   // Request modules.
   grunt_module.loadNpmTasks("grunt-contrib-clean");
   grunt_module.loadNpmTasks("grunt-shell");
-
-
-  // Generic tasks.
-  daemon_shell("daemon", function(configuration) {
-    configuration = configuration || "Release";
-    return "make CONF=" + configuration;
-  });
+  grunt_module.loadTasks("build-tools/grunt-tasks");
 
 
   // Clean tasks.
@@ -35,8 +29,12 @@ module.exports = function(grunt_module) {
 
 
   // Debug aliases.
+  grunt_module.configure("make", "daemon.debug", {
+    configuration: "Debug",
+    cwd: "snow-fox-daemon"
+  });
   grunt_module.aliasMore("debug", "debug:daemon");
-  grunt_module.alias("debug:daemon", "shell:daemon:Debug");
+  grunt_module.alias("debug:daemon", "make:daemon.debug");
 
 
   // Jenkins aliases.
@@ -49,21 +47,36 @@ module.exports = function(grunt_module) {
       "--object-directory build/Test/GNU-Linux-x86/src " +
       "--root . --exclude='.*tests.*' > coverage.xml"
   ));
+  grunt_module.configure("cpplint", "daemon", {
+    options: { root: "snow-fox-daemon/include" },
+    src: [
+      "snow-fox-daemon/include/**/*.h",
+      "snow-fox-daemon/src/**/*.cpp"
+    ]
+  });
 
   grunt_module.aliasMore("jenkins", "jenkins:daemon");
   grunt_module.alias("jenkins:daemon", [
     "clean:daemon.jenkins", "shell:daemon:Test", "shell:daemon.jenkins.test",
-    "shell:daemon.jenkins.coverge"
+    "shell:daemon.jenkins.coverge", "cpplint:daemon"
   ]);
 
 
   // Release aliases.
+  grunt_module.configure("make", "daemon.release", {
+    configuration: "Release",
+    cwd: "snow-fox-daemon"
+  });
   grunt_module.aliasMore("release", "release:daemon");
-  grunt_module.alias("release:daemon", "shell:daemon:Release");
+  grunt_module.alias("release:daemon", "make:daemon.release");
 
 
   // Test aliases.
+  grunt_module.configure("make", "daemon.test", {
+    configuration: "Test",
+    cwd: "snow-fox-daemon"
+  });
   daemon_shell("daemon.test", "dist/Test/test");
   grunt_module.aliasMore("test", "test:daemon");
-  grunt_module.alias("test:daemon", ["shell:daemon:Test", "shell:daemon.test"]);
+  grunt_module.alias("test:daemon", ["make:daemon.test", "shell:daemon.test"]);
 };

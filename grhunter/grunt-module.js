@@ -64,6 +64,10 @@ GruntModule.prototype.configure = function configure(task, subtask, config) {
   return this._configureMultiTask(task, subtask, config);
 };
 
+GruntModule.prototype.loadTasks = function loadTasks(task) {
+  this._load[task] = true;
+};
+
 GruntModule.prototype.loadNpmTasks = function loadNpmTasks(task) {
   this._load_npm[task] = true;
 };
