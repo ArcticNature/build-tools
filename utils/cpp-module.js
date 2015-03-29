@@ -119,7 +119,8 @@ var CppModuleGenerator = module.exports = function CppModuleGenerator(
     },
     src: [
       opts.code + "/include/**/*.h",
-      opts.code + "/src/**/*.cpp"
+      opts.code + "/src/**/*.cpp",
+      "!" + opts.code + "/include/**/*.template.h"
     ]
   });
 
@@ -129,7 +130,8 @@ var CppModuleGenerator = module.exports = function CppModuleGenerator(
     save_to: opts.path + "/cppcheck.xml",
     src: [
       opts.code + "/include/**/*.h",
-      opts.code + "/src/**/*.cpp"
+      opts.code + "/src/**/*.cpp",
+      "!" + opts.code + "/include/**/*.template.h"
     ]
   });
 
