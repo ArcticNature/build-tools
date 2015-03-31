@@ -30,7 +30,7 @@ module.exports = function(grunt) {
     }
 
     var done  = this.async();
-    var gcovr = new SubProcess({
+    var gcovr = new SubProcess(grunt.log, {
       args:   args,
       cmd:    options.gcovr,
       cwd:    options.cwd,

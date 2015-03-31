@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 
     // Run make.
     var done = this.async();
-    var make = new SubProcess({
+    var make = new SubProcess(grunt.log, {
       args: ["CONF=" + options.configuration],
       cmd:  "make",
       cwd:  options.cwd

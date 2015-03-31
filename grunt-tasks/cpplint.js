@@ -18,7 +18,7 @@ module.exports = function(grunt) {
     args.push.apply(args, files);
 
     // Spawn command.
-    var child = new SubProcess({
+    var child = new SubProcess(grunt.log, {
       args: args,
       cmd:  "python",
       stderr: options.save_to
