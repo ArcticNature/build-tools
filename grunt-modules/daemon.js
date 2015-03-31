@@ -33,12 +33,12 @@ module.exports = function(grunt_module) {
 
 
   // Debug aliases.
-  grunt_module.configure("make", "daemon.debug", {
+  grunt_module.configure("fake", "daemon.debug", {
     configuration: "Debug",
     cwd: "snow-fox-daemon"
   });
   grunt_module.aliasMore("debug", "debug:daemon");
-  grunt_module.alias("debug:daemon", "make:daemon.debug");
+  grunt_module.alias("debug:daemon", "fake:daemon.debug");
 
 
   // Jenkins aliases.
@@ -71,7 +71,7 @@ module.exports = function(grunt_module) {
   grunt_module.aliasMore("jenkins", "jenkins:daemon");
   grunt_module.alias("jenkins:daemon", [
     "clean:daemon.jenkins",
-    "make:daemon.test",
+    "fake:daemon.test",
     "shell:daemon.jenkins.test",
     "shell:daemon.jenkins.coverage",
     "cpplint:daemon",
@@ -80,23 +80,23 @@ module.exports = function(grunt_module) {
 
 
   // Release aliases.
-  grunt_module.configure("make", "daemon.release", {
+  grunt_module.configure("fake", "daemon.release", {
     configuration: "Release",
     cwd: "snow-fox-daemon"
   });
   grunt_module.aliasMore("release", "release:daemon");
-  grunt_module.alias("release:daemon", "make:daemon.release");
+  grunt_module.alias("release:daemon", "fake:daemon.release");
 
 
   // Test aliases.
-  grunt_module.configure("make", "daemon.test", {
+  grunt_module.configure("fake", "daemon.test", {
     configuration: "Test",
     cwd: "snow-fox-daemon"
   });
   daemon_shell("daemon.test", "dist/Test/test");
   grunt_module.aliasMore("test", "test:daemon");
   grunt_module.alias("test:daemon", [
-    "make:daemon.test",
+    "fake:daemon.test",
     "shell:daemon.test"
   ]);
 };
