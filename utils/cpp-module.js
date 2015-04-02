@@ -37,15 +37,15 @@ var GCOVR_PATH = path.resolve("build-tools/gcovr");
 
 
 var configure_clean = function configure_clean(grunt_module, names, opts) {
-  grunt_module.configure("clean", names.buid,  "out/build/" + opts.path);
+  grunt_module.configure("clean", names.build, "out/build/" + opts.path);
   grunt_module.configure("clean", names.dist,  "out/dist/" + opts.path);
   grunt_module.configure("clean", names.jnkns, "out/reports/" + opts.path);
 
-  grunt_module.aliasMore("clean:build",   "clean:" + names.buid);
+  grunt_module.aliasMore("clean:build",   "clean:" + names.build);
   grunt_module.aliasMore("clean:dist",    "clean:" + names.dist);
   grunt_module.aliasMore("clean:jenkins", "clean:" + names.jnkns);
   grunt_module.alias("clean:" + opts.name, [
-    "clean:" + names.buid,
+    "clean:" + names.build,
     "clean:" + names.dist,
     "clean:" + names.jnkns
   ]);
@@ -187,7 +187,7 @@ var CppModuleGenerator = module.exports = function CppModuleGenerator(
 
   // Build all names that will me needed during configuration.
   var names = {
-    buid:  opts.name + ".build",
+    build: opts.name + ".build",
     dist:  opts.name + ".dist",
     jnkns: opts.name + ".jenkins",
 
