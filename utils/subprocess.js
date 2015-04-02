@@ -15,6 +15,7 @@ var SubProcess = module.exports = function SubProcess(logger, options) {
   this._args = options.args || [];
   this._cmd  = options.cmd  || throw_error("Required option cmd missing.");
   this._cwd  = options.cwd  || undefined;
+  this._silent = "silent" in options ? options.silent : false;
 
   // All channels default to pipe.
   this._stdio = [
@@ -69,6 +70,22 @@ SubProcess.spawnAll = function spawnAll(processes, parallel, silent) {
 };
 
 
+SubProcess.prototype._logFail = function _logFail(code) {
+  var fn = this._logger.error;
+  if (this._silent) {
+    fn = this._logger.verbose.error;
+  }
+  fn("Exit code %s for command %s %s", code, this._cmd, this._args.join(" "));
+};
+
+SubProcess.prototype._logStart = function _logStart() {
+  var fn = this._logger.ok;
+  if (this._silent) {
+    fn = this._logger.verbose.ok;
+  }
+  fn("%s %s", this._cmd, this._args.join(" "));
+};
+
 SubProcess.prototype.spawn = function spawn() {
   // Generate stdio array for the new process.
   var stdio = [];
@@ -81,10 +98,7 @@ SubProcess.prototype.spawn = function spawn() {
   }
 
   // Spawn it.
-  this._logger.verbose.writeln(
-      "Running %s %s (from directory %s).", this._cmd,
-      this._args.join(" "), this._cwd || "."
-  );
+  this._logStart();
   var child = child_process.spawn(this._cmd, this._args, {
     cwd:   this._cwd,
     stdio: stdio
@@ -98,10 +112,7 @@ SubProcess.prototype.spawn = function spawn() {
     if (code === 0) {
       promise.resolve();
     } else {
-      subprocess._logger.verbose.error(
-          "Command %s %s (from directory %s) failed!", subprocess._cmd,
-          subprocess._args.join(" "), subprocess._cwd || "."
-      );
+      subprocess._logFail(code || signal);
       promise.reject(code || signal);
     }
   });

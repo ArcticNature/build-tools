@@ -21,7 +21,8 @@ module.exports = function(grunt) {
     var child = new SubProcess(grunt.log, {
       args: args,
       cmd:  "python",
-      stderr: options.save_to
+      stderr: options.save_to,
+      silent: options.silent
     });
 
     // And wait for its return.

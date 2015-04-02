@@ -1,9 +1,8 @@
 module.exports = function(grunt_module) {
 
-  require("../utils/cpp-module-fake")(grunt_module, {
-    code: "snow-fox-exceptions/",
+  require("../utils/cpp-module")(grunt_module, {
     name: "exceptions",
-    path: "netbeans-projects/snow-fox-exceptions/"
+    path: "snow-fox-exceptions/"
   });
 
 };
