@@ -54,12 +54,7 @@ var configure_clean = function configure_clean(grunt_module, names, opts) {
 var configure_cxx_target = function configure_cxx_target(
     target, grunt_module, name, opts, deps
 ) {
-  grunt_module.configure("ar", name, {
-    files: [{
-        dest: "out/dist/" + target + "/" + opts.path + "/" + opts.name + ".a",
-        src:  "out/build/" + target + "/" + opts.path + "/**/*.o"
-    }]
-  });
+  var tasks = ["g++:" + name];
   grunt_module.configure("g++", name, {
     coverage: target === "test",
     include:  get_includes(deps, opts, target),
@@ -67,19 +62,23 @@ var configure_cxx_target = function configure_cxx_target(
     src: [opts.path + "/src/**/*.cpp"]
   });
 
+  grunt_module.configure("ar", name, {
+    files: [{
+        dest: "out/dist/" + target + "/" + opts.path + "/" + opts.name + ".a",
+        src:  "out/build/" + target + "/" + opts.path + "/**/*.o"
+    }]
+  });
+
   grunt_module.configure("shell", name + ".ranlib", {
     command: (
         "ranlib out/dist/" + target + "/" + opts.path + "/" + opts.name + ".a"
     )
   });
+  tasks.push("ar:" + name, "shell:" + name + ".ranlib");
 
   grunt_module.aliasMore(target, target + ":" + opts.name);
   grunt_module.alias(target + ":" + opts.name, tasks_runner(
-      grunt_module.getGrunt(), deps, opts.name, target, [
-        "g++:" + name,
-        "ar:"  + name,
-        "shell:" + name + ".ranlib"
-      ]
+      grunt_module.getGrunt(), deps, opts.name, target, tasks
   ));
 };
 
@@ -131,11 +130,14 @@ var configure_jenkins = function configure_jenkins(
 };
 
 var configure_test = function configure_test(grunt_module, names, opts, deps) {
+  var objects = ["out/build/test/" + opts.path + "/**/*.o"];
+  objects.push.apply(objects, get_static_libraries(deps, opts, "test"));
+
   grunt_module.configure("link++", names.test, {
-    libs:  ["pthread", "gcov"],
+    libs:  get_libraries(deps, opts, "test"),
     files: [{
         dest: "out/dist/test/" + opts.path + "/test",
-        src:  "out/build/test/" + opts.path + "/**/*.o"
+        src:  objects
     }]
   });
 
@@ -179,6 +181,14 @@ var get_includes = function get_includes(deps, opts, target) {
   var includes = deps.resolveIncludes(opts.name, target);
   includes.push(opts.path + "/include");
   return includes;
+};
+
+var get_libraries = function get_libraries(deps, opts, target) {
+  return deps.resolveLibraries(opts.name, target);
+};
+
+var get_static_libraries = function get_static_libraries(deps, opts, target) {
+  return deps.resolveStaticLibraries(opts.name, target);
 };
 
 var tasks_runner = function tasks_runner(grunt, deps, name, target, tasks) {

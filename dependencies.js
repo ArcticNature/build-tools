@@ -19,6 +19,7 @@ module.exports = [{
     release: { type: "lib" },
     test:    {
       include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
       type: "test"
     }
   }
@@ -26,12 +27,13 @@ module.exports = [{
 }, {
   name: "utils",
   path: "core/snow-fox-utils",
-  deps: ["exceptions"],
+  deps: ["exceptions", "posix"],
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },
     test:    {
       include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
       type: "test"
     }
   }

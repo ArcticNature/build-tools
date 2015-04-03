@@ -121,19 +121,21 @@ DepsManager.prototype.project = function project(configuration) {
     targets[target] = {
       deps:    process_dependencies(target, spec.deps, configuration.deps),
       include: merge_arrays(spec.include, configuration.include),
-      libs:    merge_arrays(spec.libs, configuration.libs)
+      libs:    merge_arrays(spec.libs, configuration.libs),
+      type:    spec.type || null
     };
   }
 
   // Register the project.
   this._projects[configuration.name] = {
+    name: configuration.name,
     path: configuration.path,
     targets: targets
   };
 };
 
 DepsManager.prototype.resolveIncludes = function resolveIncludes(name, target) {
-  var tasks    = this._depthFirstSearch({
+  var tasks = this._depthFirstSearch({
     name:   name,
     target: target
   });
@@ -149,6 +151,40 @@ DepsManager.prototype.resolveIncludes = function resolveIncludes(name, target) {
   }
 
   return includes;
+};
+
+DepsManager.prototype.resolveLibraries = function resolveLibraries(
+    name, target
+) {
+  return this._projects[name].targets[target].libs || [];
+};
+
+DepsManager.prototype.resolveStaticLibraries = function resolveStaticLibraries(
+    name, target
+) {
+  var tasks = this._depthFirstSearch({
+    name:   name,
+    target: target
+  });
+  tasks.pop();
+
+  var libs = [];
+  for (var idx=0; idx<tasks.length; idx++) {
+    var task    = tasks[idx];
+    var project = this._projects[task.name];
+    var target  = project.targets[task.target];
+
+    if (target.type !== "lib") {
+      continue;
+    }
+
+    libs.push(
+        "out/dist/" + task.target + "/" + project.path +
+        "/" + project.name + ".a"
+    );
+  }
+
+  return libs;
 };
 
 DepsManager.prototype.resolveTasks = function resolveTasks(name, target) {
