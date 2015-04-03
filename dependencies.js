@@ -64,7 +64,7 @@ module.exports = [{
 
 }, {
   name: "version",
-  path: "snow-fox-version",
+  path: "daemon/core/version",
   targets: {
     debug:   { type: "include" },
     release: { type: "include" },
