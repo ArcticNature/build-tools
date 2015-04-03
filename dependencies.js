@@ -64,6 +64,7 @@ module.exports = [{
   targets: {
     debug: { type: "lib" }
   }
+
 }, {
   name: "utils",
   path: "daemon/core/utils",
