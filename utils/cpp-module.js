@@ -36,13 +36,6 @@ var path = require("path");
 var GCOVR_PATH = path.resolve("build-tools/gcovr");
 
 
-var concat_array = function concat_array(first, second) {
-  var result = [];
-  result.push.apply(result, first);
-  result.push.apply(result, second);
-  return result;
-};
-
 var configure_clean = function configure_clean(grunt_module, names, opts) {
   grunt_module.configure("clean", names.build, "out/build/" + opts.path);
   grunt_module.configure("clean", names.dist,  "out/dist/" + opts.path);
@@ -69,9 +62,8 @@ var configure_cxx_target = function configure_cxx_target(
   });
   grunt_module.configure("g++", name, {
     coverage: target === "test",
+    include:  get_includes(deps, opts, target),
     objects_path: "out/build/" + target,
-
-    include: [opts.path + "/include", "3rd-parties/include"],
     src: [opts.path + "/src/**/*.cpp"]
   });
 
@@ -91,10 +83,11 @@ var configure_cxx_target = function configure_cxx_target(
   ));
 };
 
-var configure_jenkins = function configure_jenkins(grunt_module, names, opts) {
+var configure_jenkins = function configure_jenkins(
+    grunt_module, names, opts, deps
+) {
   // Test coverage.
   grunt_module.configure("gcovr", opts.name, {
-    //cwd: "" + opts.path,
     exclude: ".*(3rd-parties|tests).*",
     gcovr:   GCOVR_PATH,
     objects: "out/build/test/" + opts.path + "/src",
@@ -118,7 +111,7 @@ var configure_jenkins = function configure_jenkins(grunt_module, names, opts) {
   // Static analysis.
   grunt_module.configure("cppcheck", opts.name, {
     exclude: ["3rd-parties", opts.path + "/tests"],
-    include: [opts.path + "/include", "3rd-parties/include"],
+    include: get_includes(deps, opts, "test"),
     save_to: "out/reports/" + opts.path + "/cppcheck.xml",
     src: [
       opts.path + "/include/**/*.h",
@@ -148,7 +141,6 @@ var configure_test = function configure_test(grunt_module, names, opts, deps) {
 
   grunt_module.configure("g++", names.test + ".gtest", {
     objects_path: "out/build/test/" + opts.path,
-
     include: ["3rd-parties/include", "3rd-parties/sources/gtest"],
     src: [
       "3rd-parties/sources/gtest/src/gtest-all.cc",
@@ -158,8 +150,7 @@ var configure_test = function configure_test(grunt_module, names, opts, deps) {
 
   grunt_module.configure("g++", names.test, {
     objects_path: "out/build/test/",
-
-    include: [opts.path + "/include", "3rd-parties/include"],
+    include: get_includes(deps, opts, "test"),
     src: [
       opts.path + "/src/**/*.cpp",
       opts.path + "/tests/**/*.cpp"
@@ -182,6 +173,12 @@ var configure_test = function configure_test(grunt_module, names, opts, deps) {
         "shell:"  + names.test
       ]
   ));
+};
+
+var get_includes = function get_includes(deps, opts, target) {
+  var includes = deps.resolveIncludes(opts.name, target);
+  includes.push(opts.path + "/include");
+  return includes;
 };
 
 var tasks_runner = function tasks_runner(grunt, deps, name, target, tasks) {
@@ -232,7 +229,7 @@ var CppModuleGenerator = module.exports = function CppModuleGenerator(
   configure_cxx_target("debug",   grunt_module, names.debug,   opts, deps);
   configure_cxx_target("release", grunt_module, names.release, opts, deps);
   configure_test(grunt_module, names, opts, deps);
-  configure_jenkins(grunt_module, names, opts);
+  configure_jenkins(grunt_module, names, opts, deps);
 
   // Short-hand for release task.
   grunt_module.alias(opts.name, "release:" + opts.name);

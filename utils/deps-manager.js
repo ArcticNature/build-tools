@@ -132,6 +132,25 @@ DepsManager.prototype.project = function project(configuration) {
   };
 };
 
+DepsManager.prototype.resolveIncludes = function resolveIncludes(name, target) {
+  var tasks    = this._depthFirstSearch({
+    name:   name,
+    target: target
+  });
+  var current  = tasks.pop();
+  var includes = [];
+  includes.push.apply(
+      includes, this._projects[current.name].targets[current.target].include
+  );
+
+  for (var idx=0; idx<tasks.length; idx++) {
+    var task = tasks[idx];
+    includes.push(this._projects[task.name].path + "/include");
+  }
+
+  return includes;
+};
+
 DepsManager.prototype.resolveTasks = function resolveTasks(name, target) {
   var tasks = this._depthFirstSearch({
     name:   name,
