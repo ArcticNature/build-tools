@@ -110,6 +110,10 @@ DepsManager.prototype.getProjectMetadata = function getProjectMetadata(name) {
   };
 };
 
+DepsManager.prototype.targetExists = function targetExists(name, target) {
+  return name in this._projects && target in this._projects[name].targets;
+};
+
 DepsManager.prototype.project = function project(configuration) {
   var targets = {};
 
@@ -135,6 +139,10 @@ DepsManager.prototype.project = function project(configuration) {
 };
 
 DepsManager.prototype.resolveIncludes = function resolveIncludes(name, target) {
+  if (!this.targetExists(name, target)) {
+    return [];
+  }
+
   var tasks = this._depthFirstSearch({
     name:   name,
     target: target
@@ -156,12 +164,19 @@ DepsManager.prototype.resolveIncludes = function resolveIncludes(name, target) {
 DepsManager.prototype.resolveLibraries = function resolveLibraries(
     name, target
 ) {
+  if (!this.targetExists(name, target)) {
+    return [];
+  }
   return this._projects[name].targets[target].libs || [];
 };
 
 DepsManager.prototype.resolveStaticLibraries = function resolveStaticLibraries(
     name, target
 ) {
+  if (!this.targetExists(name, target)) {
+    return [];
+  }
+
   var tasks = this._depthFirstSearch({
     name:   name,
     target: target
@@ -188,6 +203,10 @@ DepsManager.prototype.resolveStaticLibraries = function resolveStaticLibraries(
 };
 
 DepsManager.prototype.resolveTasks = function resolveTasks(name, target) {
+  if (!this.targetExists(name, target)) {
+    return [];
+  }
+
   var tasks = this._depthFirstSearch({
     name:   name,
     target: target

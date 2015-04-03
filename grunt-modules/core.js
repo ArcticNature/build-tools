@@ -5,5 +5,8 @@ module.exports = function(grunt_module, deps) {
   configure(grunt_module, deps, "exceptions");
   configure(grunt_module, deps, "posix");
   configure(grunt_module, deps, "utils");
+  configure(grunt_module, deps, "logging");
 
+  // Test only.
+  configure(grunt_module, deps, "testing");
 };
