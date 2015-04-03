@@ -32,12 +32,35 @@ module.exports = function(grunt) {
       extDot: "last"
     });
 
-    // Filter paths based on modification time.
+    // Check all additional include files.
+    // If any of them was modified after the target re-build it.
+    var include_last_modified = 0;
+    if (options.include && options.include.length > 0) {
+      // Find greatest last modified time for each include path.
+      var times = options.include.map(function(include) {
+        var headers = grunt.file.expand(include + "/**/*.h");
+        headers = headers.map(function(header) {
+          return fs.statSync(header).mtime.getTime();
+        });
+
+        if (headers.length === 1) {
+          return headers[0];
+        }
+        return Math.max.apply(Math, headers);
+      });
+
+      if (times.length === 1) {
+        include_last_modified = times[0];
+      }
+      include_last_modified = Math.max.apply(Math, times) || 0;
+    }
+
+    // Filter paths based on last edit time.
     sources = sources.filter(function(source) {
       try {
         var src    = fs.statSync(source.src[0]).mtime.getTime();
         var target = fs.statSync(source.dest).mtime.getTime();
-        return src >= target;
+        return Math.max(src, include_last_modified) >= target;
 
       } catch(ex) { /* NOOP */ }
       return true;
