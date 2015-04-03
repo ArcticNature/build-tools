@@ -110,6 +110,15 @@ DepsManager.prototype.getProjectMetadata = function getProjectMetadata(name) {
   };
 };
 
+DepsManager.prototype.getTypeForTarget = function getTypeForTarget(
+    name, target
+) {
+  if (!this.targetExists(name, target)) {
+    return null;
+  };
+  return this._projects[name].targets[target].type || null;
+};
+
 DepsManager.prototype.targetExists = function targetExists(name, target) {
   return name in this._projects && target in this._projects[name].targets;
 };

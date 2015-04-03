@@ -1,4 +1,25 @@
 module.exports = [{
+  name: "daemon",
+  path: "daemon/daemon",
+  include: ["3rd-parties/include"],
+  libs: ["lua", "gflags"],
+  deps: [
+    "logging",
+    "state",
+    "spawner-channel",
+    "user-posix"
+  ],
+  targets: {
+    debug:   { type: "bin" },
+    release: { type: "bin" },
+    test:    {
+      deps: ["test.version"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
   name: "exceptions",
   path: "daemon/core/exceptions",
   targets: {
@@ -56,6 +77,20 @@ module.exports = [{
   }
 
 }, {
+  name: "spawner-channel",
+  path: "daemon/spawner/channel",
+  deps: ["logging", "posix", "utils"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
   name: "testing",
   path: "daemon/core/testing",
 
@@ -63,6 +98,20 @@ module.exports = [{
   include: ["daemon/logging/logging/include"],
   targets: {
     debug: { type: "lib" }
+  }
+
+}, {
+  name: "user-posix",
+  path: "daemon/posix/user-posix",
+  deps: ["posix"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
   }
 
 }, {

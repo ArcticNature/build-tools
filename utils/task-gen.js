@@ -28,6 +28,51 @@ var tasks_runner = function tasks_runner(grunt, deps, name, target, tasks) {
 };
 
 
+/*! Configures tasks for binary targets. */
+var configure_bin_type = function configure_bin_type(
+    deps, grunt_module, name, opts, target, tasks
+) {
+  var objects = ["out/build/" + target + "/" + opts.path + "/**/*.o"];
+  objects.push.apply(objects, get_static_libraries(deps, opts, target));
+
+  grunt_module.configure("link++", name, {
+    libs:  get_libraries(deps, opts, target),
+    files: [{
+        dest: "out/dist/" + target + "/" + opts.path + "/" + opts.name,
+        src:  objects
+    }]
+  });
+
+  tasks.push("link++:" + name);
+};
+
+/*! Configures tasks for static library targets. */
+var configure_lib_type = function configure_lib_type(
+    deps, grunt_module, name, opts, target, tasks
+) {
+  grunt_module.configure("ar", name, {
+    files: [{
+        dest: "out/dist/" + target + "/" + opts.path + "/" + opts.name + ".a",
+        src:  "out/build/" + target + "/" + opts.path + "/**/*.o"
+    }]
+  });
+
+  grunt_module.configure("ranlib", name, {
+    files: [{
+        dest: "out/dist/" + target + "/" + opts.path + "/" + opts.name + ".a",
+        src:  "out/build/" + target + "/" + opts.path + "/**/*.o"
+    }]
+  });
+
+  tasks.push("ar:" + name, "ranlib:" + name);
+};
+
+var COFIG_BY_TYPE = {
+  bin: configure_bin_type,
+  lib: configure_lib_type
+};
+
+
 /*!
  * Generates clean tasks for a module.
  * 
@@ -85,19 +130,11 @@ task_gen.configure_cxx_target = function configure_cxx_target(
     src: [opts.path + "/src/**/*.cpp"]
   });
 
-  grunt_module.configure("ar", name, {
-    files: [{
-        dest: "out/dist/" + target + "/" + opts.path + "/" + opts.name + ".a",
-        src:  "out/build/" + target + "/" + opts.path + "/**/*.o"
-    }]
-  });
-
-  grunt_module.configure("shell", name + ".ranlib", {
-    command: (
-        "ranlib out/dist/" + target + "/" + opts.path + "/" + opts.name + ".a"
-    )
-  });
-  tasks.push("ar:" + name, "shell:" + name + ".ranlib");
+  var target_type = deps.getTypeForTarget(opts.name, target);
+  var type_config = COFIG_BY_TYPE[target_type];
+  if (type_config) {
+    type_config(deps, grunt_module, name, opts, target, tasks);
+  }
 
   grunt_module.aliasMore(target, target + "." + opts.name);
   grunt_module.alias(target + "." + opts.name, tasks_runner(
