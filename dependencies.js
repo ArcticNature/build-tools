@@ -1,18 +1,19 @@
 module.exports = [{
   name: "exceptions",
-  path: "snow-fox-exceptions",
+  path: "daemon/core/exceptions",
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },
     test:    {
       include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
       type: "test"
     }
   }
 
 }, {
   name: "logging",
-  path: "logging/snow-fox-logging",
+  path: "daemon/logging/logging",
   deps: ["utils"],
   targets: {
     debug:   { type: "lib" },
@@ -27,7 +28,7 @@ module.exports = [{
 
 }, {
   name: "posix",
-  path: "posix/snow-fox-posix",
+  path: "daemon/posix/posix",
   deps: ["exceptions"],
   targets: {
     debug:   { type: "lib" },
@@ -41,16 +42,16 @@ module.exports = [{
 
 }, {
   name: "testing",
-  path: "core/snow-fox-testing",
+  path: "daemon/core/testing",
 
   // Manually add logging include path to avoid circular dependency.
-  include: ["logging/snow-fox-logging/include"],
+  include: ["daemon/logging/logging/include"],
   targets: {
     debug: { type: "lib" }
   }
 }, {
   name: "utils",
-  path: "core/snow-fox-utils",
+  path: "daemon/core/utils",
   deps: ["exceptions", "posix"],
   targets: {
     debug:   { type: "lib" },

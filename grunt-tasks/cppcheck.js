@@ -1,4 +1,6 @@
-var Q = require("q");
+var fs   = require("fs");
+var path = require("path");
+var Q    = require("q");
 var SubProcess = require("../utils/subprocess");
 
 
@@ -9,6 +11,15 @@ module.exports = function(grunt) {
         return pref + name;
       };
     };
+
+    // Ensure target paths exist.
+    var target = path.dirname(path.normalize(options.save_to));
+    if (!fs.existsSync(target)) {
+      grunt.file.mkdir(target);
+    }
+    if (grunt.option("no-write")) {
+      return;
+    }
 
     // Prepare arguments.
     var args = [];

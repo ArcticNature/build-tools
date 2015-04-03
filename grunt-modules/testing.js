@@ -1,39 +1,4 @@
-/**
- * Populates a GrHunter module with tasks related to a C++ project.
- * In this description, {name} refers to the name of the module being
- * configured.
- * 
- * The following tasks are added:
- *   * {name} Build a release version of the component.
- *   * debug:{name}    Build debug version of the component.
- *   * release:{name}  Build release version of the component.
- *   * jenkins:{name}  Run tests and reports for the component.
- *
- *   * clean:{name}          Run all clean tasks for the component.
- *   * clean:{name}.build    Clean object files for the component.
- *   * clean:{name}.dist     Clean target files for the component.
- *   * clean:{name}.jenkins  Clean metrics-related reports.
- *
- *   * make:{name}.debug    Run make Debug for the component.
- *   * make:{name}.release  Run make Release for the component.
- *   * make:{name}.test     Run make Test for the component.
- *   * shell:{name}.test    Run tests binary for the component.
- *
- *   * cppcheck:{name}  Run CppCheck on the component.
- *   * cpplint:{name}   Run CppLint on the component.
- *   * gcovr:{name}     Generate coverage report for the component.
- * 
- * The following tasks are extended:
- *   * debug    Run all debug tasks for all components.
- *   * clean    Run all clean tasks for all components.
- *   * jenkins  Run all tests and reports for all components.
- *
- *   * clean:build    Run debug clean task for all components.
- *   * clean:dist     Run dist clean task for all components.
- *   * clean:jenkins  Run jenkin clean task for all components.
- */
 var path = require("path");
-var GCOVR_PATH = path.resolve("build-tools/gcovr");
 
 
 var configure_clean = function configure_clean(grunt_module, names, opts) {
@@ -85,14 +50,6 @@ var configure_cxx_target = function configure_cxx_target(
 var configure_jenkins = function configure_jenkins(
     grunt_module, names, opts, deps
 ) {
-  // Test coverage.
-  grunt_module.configure("gcovr", opts.name, {
-    exclude: ".*(3rd-parties|tests).*",
-    gcovr:   GCOVR_PATH,
-    objects: "out/build/test/" + opts.path + "/src",
-    save_to: "out/reports/" + opts.path + "/coverage.xml"
-  });
-
   // Code style.
   grunt_module.configure("cpplint", opts.name, {
     options: {
@@ -122,59 +79,9 @@ var configure_jenkins = function configure_jenkins(
   grunt_module.aliasMore("jenkins", "jenkins:" + opts.name);
   grunt_module.alias("jenkins:" + opts.name, [
     "clean:" + names.jnkns,
-    "test:" + opts.name,
-    "gcovr:" + opts.name,
     "cpplint:"  + opts.name,
     "cppcheck:" + opts.name
   ]);
-};
-
-var configure_test = function configure_test(grunt_module, names, opts, deps) {
-  var objects = ["out/build/test/" + opts.path + "/**/*.o"];
-  objects.push.apply(objects, get_static_libraries(deps, opts, "test"));
-
-  grunt_module.configure("link++", names.test, {
-    libs:  get_libraries(deps, opts, "test"),
-    files: [{
-        dest: "out/dist/test/" + opts.path + "/test",
-        src:  objects
-    }]
-  });
-
-  grunt_module.configure("g++", names.test + ".gtest", {
-    objects_path: "out/build/test/" + opts.path,
-    include: ["3rd-parties/include", "3rd-parties/sources/gtest"],
-    src: [
-      "3rd-parties/sources/gtest/src/gtest-all.cc",
-      "3rd-parties/sources/gtest/src/gtest_main.cc"
-    ]
-  });
-
-  grunt_module.configure("g++", names.test, {
-    objects_path: "out/build/test/",
-    include: get_includes(deps, opts, "test"),
-    src: [
-      opts.path + "/src/**/*.cpp",
-      opts.path + "/tests/**/*.cpp"
-    ]
-  });
-
-  grunt_module.configure("shell", names.test, {
-    command: (
-        "out/dist/test/" + opts.path + "/test --gtest_output='xml:" +
-        "out/reports/" + opts.path + "/test-results.xml'"
-    )
-  });
-
-  grunt_module.aliasMore("test", "test:" + opts.name);
-  grunt_module.alias("test:" + opts.name, tasks_runner(
-      grunt_module.getGrunt(), deps, opts.name, "test", [
-        "g++:"    + names.test,
-        "g++:"    + names.test + ".gtest",
-        "link++:" + names.test,
-        "shell:"  + names.test
-      ]
-  ));
 };
 
 var get_includes = function get_includes(deps, opts, target) {
@@ -201,11 +108,8 @@ var tasks_runner = function tasks_runner(grunt, deps, name, target, tasks) {
   };
 };
 
-
-var CppModuleGenerator = module.exports = function CppModuleGenerator(
-    grunt_module, deps, name
-) {
-  var opts = deps.getProjectMetadata(name);
+module.exports = function(grunt_module, deps) {
+  var opts = deps.getProjectMetadata("testing");
 
   // Ensure required options are set.
   if (!opts.name) {
@@ -220,10 +124,7 @@ var CppModuleGenerator = module.exports = function CppModuleGenerator(
     build: opts.name + ".build",
     dist:  opts.name + ".dist",
     jnkns: opts.name + ".jenkins",
-
-    debug:   opts.name + ".debug",
-    release: opts.name + ".release",
-    test:    opts.name + ".test"
+    debug: opts.name + ".debug"
   };
 
   // Request modules.
@@ -234,11 +135,6 @@ var CppModuleGenerator = module.exports = function CppModuleGenerator(
 
   // Configure tasks.
   configure_clean(grunt_module, names, opts);
-  configure_cxx_target("debug",   grunt_module, names.debug,   opts, deps);
-  configure_cxx_target("release", grunt_module, names.release, opts, deps);
-  configure_test(grunt_module, names, opts, deps);
+  configure_cxx_target("debug", grunt_module, names.debug, opts, deps);
   configure_jenkins(grunt_module, names, opts, deps);
-
-  // Short-hand for release task.
-  grunt_module.alias(opts.name, "release:" + opts.name);
 };

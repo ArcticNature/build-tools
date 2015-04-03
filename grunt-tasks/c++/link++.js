@@ -21,7 +21,7 @@ module.exports = function(grunt) {
     // Find files to process.
     var sources = this.files.filter(function(source) {
       try {
-        var oldest = Math.min(source.src.map(function(input) {
+        var oldest = Math.max.apply(Math, source.src.map(function(input) {
           return fs.statSync(input).mtime.getTime();
         }));
         var target = fs.statSync(path.normalize(source.dest)).mtime.getTime();
