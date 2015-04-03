@@ -1,4 +1,6 @@
-var GruntModule = module.exports = function GruntModule() {
+var GruntModule = module.exports = function GruntModule(grunt) {
+  this._grunt = grunt;
+
   this._alias = {};
   this._alias_more = {};
   this._load = {};
@@ -62,6 +64,10 @@ GruntModule.prototype.configure = function configure(task, subtask, config) {
     return this._configureTask(task, config);
   }
   return this._configureMultiTask(task, subtask, config);
+};
+
+GruntModule.prototype.getGrunt = function getGrunt() {
+  return this._grunt;
 };
 
 GruntModule.prototype.loadTasks = function loadTasks(task) {

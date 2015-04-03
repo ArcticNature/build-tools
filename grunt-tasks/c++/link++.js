@@ -79,6 +79,8 @@ module.exports = function(grunt) {
     var done = this.async();
     SubProcess.spawnAll(children).then(function() {
       done();
+    }).fail(function(code) {
+      done(new Error(code));
     });
   });
 };

@@ -85,6 +85,8 @@ module.exports = function(grunt) {
     var done = this.async();
     SubProcess.spawnAll(children, grunt.option("parallel")).then(function() {
       done();
+    }).fail(function(code) {
+      done(new Error(code));
     });
   };
 

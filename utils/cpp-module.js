@@ -36,6 +36,13 @@ var path = require("path");
 var GCOVR_PATH = path.resolve("build-tools/gcovr");
 
 
+var concat_array = function concat_array(first, second) {
+  var result = [];
+  result.push.apply(result, first);
+  result.push.apply(result, second);
+  return result;
+};
+
 var configure_clean = function configure_clean(grunt_module, names, opts) {
   grunt_module.configure("clean", names.build, "out/build/" + opts.path);
   grunt_module.configure("clean", names.dist,  "out/dist/" + opts.path);
@@ -52,7 +59,7 @@ var configure_clean = function configure_clean(grunt_module, names, opts) {
 };
 
 var configure_cxx_target = function configure_cxx_target(
-    target, grunt_module, name, opts
+    target, grunt_module, name, opts, deps
 ) {
   grunt_module.configure("ar", name, {
     files: [{
@@ -75,11 +82,13 @@ var configure_cxx_target = function configure_cxx_target(
   });
 
   grunt_module.aliasMore(target, target + ":" + opts.name);
-  grunt_module.alias(target + ":" + opts.name, [
-    "g++:" + name,
-    "ar:"  + name,
-    "shell:" + name + ".ranlib"
-  ]);
+  grunt_module.alias(target + ":" + opts.name, tasks_runner(
+      grunt_module.getGrunt(), deps, opts.name, target, [
+        "g++:" + name,
+        "ar:"  + name,
+        "shell:" + name + ".ranlib"
+      ]
+  ));
 };
 
 var configure_jenkins = function configure_jenkins(grunt_module, names, opts) {
@@ -128,7 +137,7 @@ var configure_jenkins = function configure_jenkins(grunt_module, names, opts) {
   ]);
 };
 
-var configure_test = function configure_test(grunt_module, names, opts) {
+var configure_test = function configure_test(grunt_module, names, opts, deps) {
   grunt_module.configure("link++", names.test, {
     libs:  ["pthread", "gcov"],
     files: [{
@@ -165,18 +174,34 @@ var configure_test = function configure_test(grunt_module, names, opts) {
   });
 
   grunt_module.aliasMore("test", "test:" + opts.name);
-  grunt_module.alias("test:" + opts.name, [
-    "g++:"    + names.test,
-    "g++:"    + names.test + ".gtest",
-    "link++:" + names.test,
-    "shell:"  + names.test
-  ]);
+  grunt_module.alias("test:" + opts.name, tasks_runner(
+      grunt_module.getGrunt(), deps, opts.name, "test", [
+        "g++:"    + names.test,
+        "g++:"    + names.test + ".gtest",
+        "link++:" + names.test,
+        "shell:"  + names.test
+      ]
+  ));
+};
+
+var tasks_runner = function tasks_runner(grunt, deps, name, target, tasks) {
+  return function() {
+    if (!deps.__resolved) {
+      deps.__resolved = true;
+      grunt.task.run(deps.resolveTasks(name, target));
+      grunt.log.ok("Queued main task dependencies.");
+    }
+    grunt.task.run(tasks);
+    grunt.log.ok("Queued tasks.");
+  };
 };
 
 
 var CppModuleGenerator = module.exports = function CppModuleGenerator(
-    grunt_module, opts
+    grunt_module, deps, name
 ) {
+  var opts = deps.getProjectMetadata(name);
+
   // Ensure required options are set.
   if (!opts.name) {
     throw new Error("Required name of the component being configured.");
@@ -204,9 +229,9 @@ var CppModuleGenerator = module.exports = function CppModuleGenerator(
 
   // Configure tasks.
   configure_clean(grunt_module, names, opts);
-  configure_cxx_target("debug",   grunt_module, names.debug,   opts);
-  configure_cxx_target("release", grunt_module, names.release, opts);
-  configure_test(grunt_module, names, opts);
+  configure_cxx_target("debug",   grunt_module, names.debug,   opts, deps);
+  configure_cxx_target("release", grunt_module, names.release, opts, deps);
+  configure_test(grunt_module, names, opts, deps);
   configure_jenkins(grunt_module, names, opts);
 
   // Short-hand for release task.

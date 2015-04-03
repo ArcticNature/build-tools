@@ -123,7 +123,7 @@ GrHunter.prototype.addModule = function addModule(module_name) {
   if (module_name in this._modules) {
     throw new Error("Cannot define module " + module_name + " more than once.");
   }
-  this._modules[module_name] = new GruntModule();
+  this._modules[module_name] = new GruntModule(this._grunt);
   this._modules_order.push(module_name);
   return this._modules[module_name];
 };
@@ -138,11 +138,17 @@ GrHunter.prototype.compose = function compose() {
   this._composeAliases();
 };
 
-GrHunter.prototype.loadModule = function loadModule(module_location) {
+GrHunter.prototype.loadModule = function loadModule(
+    module_location/*, varargs */
+) {
   module_location  = path.resolve(path.normalize(module_location));
   var node_module  = require(module_location);
   var grunt_module = this.addModule(module_location);
-  node_module(grunt_module, this);
+
+  var args = [grunt_module];
+  args.push.apply(args, Array.prototype.slice.call(arguments, 1));
+  args.push(this);
+  node_module.apply(node_module, args);
 };
 
 GrHunter.prototype.package = function package(pkg) {

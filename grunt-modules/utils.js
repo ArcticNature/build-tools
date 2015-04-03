@@ -1,9 +1,6 @@
-module.exports = function(grunt_module) {
+module.exports = function(grunt_module, deps) {
 
-  require("../utils/cpp-module-fake")(grunt_module, {
-    code: "snow-fox-utils/",
-    name: "utils",
-    path: "netbeans-projects/snow-fox-utils/"
-  });
+  var configure = require("../utils/cpp-module");
+  configure(grunt_module, deps, "utils");
 
 };

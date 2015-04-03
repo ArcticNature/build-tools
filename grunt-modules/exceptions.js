@@ -1,8 +1,6 @@
-module.exports = function(grunt_module) {
+module.exports = function(grunt_module, deps) {
 
-  require("../utils/cpp-module")(grunt_module, {
-    name: "exceptions",
-    path: "snow-fox-exceptions/"
-  });
+  var configure = require("../utils/cpp-module");
+  configure(grunt_module, deps, "exceptions");
 
 };
