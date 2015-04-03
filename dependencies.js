@@ -13,7 +13,9 @@ module.exports = [{
     debug:   { type: "bin" },
     release: { type: "bin" },
     test:    {
-      deps: ["test.version"],
+      deps: ["debug.testing", "test.version"],
+      exclude: ["daemon/daemon/src/main.cpp"],
+      include: ["daemon/daemon/tests"],
       libs: ["pthread", "gcov"],
       type: "test"
     }

@@ -103,6 +103,13 @@ DepsManager.prototype._depthFirstSearch = function _depthFirstSearch(
   return res;
 };
 
+DepsManager.prototype.getExcludes = function getExcludes(name, target) {
+  if (!this.targetExists(name, target)) {
+    return [];
+  }
+  return this._projects[name].targets[target].exclude;
+};
+
 DepsManager.prototype.getProjectMetadata = function getProjectMetadata(name) {
   return {
     name: name,
@@ -133,6 +140,7 @@ DepsManager.prototype.project = function project(configuration) {
 
     targets[target] = {
       deps:    process_dependencies(target, spec.deps, configuration.deps),
+      exclude: merge_arrays(spec.exclude, configuration.exclude),
       include: merge_arrays(spec.include, configuration.include),
       libs:    merge_arrays(spec.libs, configuration.libs),
       type:    spec.type || null

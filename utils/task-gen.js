@@ -3,6 +3,13 @@ var task_gen   = module.exports = {};
 var GCOVR_PATH = path.resolve("build-tools/gcovr");
 
 
+var get_excludes = function get_excludes(deps, opts, target) {
+  var excludes = deps.getExcludes(opts.name, target);
+  return excludes.map(function(exclude) {
+    return "!" + exclude;
+  });
+};
+
 var get_includes = function get_includes(deps, opts, target) {
   var includes = deps.resolveIncludes(opts.name, target);
   includes.push(opts.path + "/include");
@@ -17,10 +24,23 @@ var get_static_libraries = function get_static_libraries(deps, opts, target) {
   return deps.resolveStaticLibraries(opts.name, target);
 };
 
+// Keep track of all dependencies seen across all tasks.
+var all_seen_deps = {};
 var tasks_runner = function tasks_runner(grunt, deps, name, target, tasks) {
   return function() {
-    grunt.task.run(deps.resolveTasks(name, target));
-    grunt.log.ok("Queued main task dependencies.");
+    var task_deps = deps.resolveTasks(name, target);
+    task_deps = task_deps.filter(function(task) {
+      var parts = task.split(".");
+      var name  = parts[1];
+      var seen  = all_seen_deps[name] || false;
+      all_seen_deps[name] = true;
+      return !seen;
+    });
+
+    if (task_deps.length > 0) {
+      grunt.task.run(task_deps);
+      grunt.log.ok("Queued main task dependencies.");
+    }
 
     grunt.task.run(tasks);
     grunt.log.ok("Queued tasks.");
@@ -123,11 +143,14 @@ task_gen.configure_cxx_target = function configure_cxx_target(
     target, grunt_module, name, opts, deps
 ) {
   var tasks = ["g++:" + name];
+  var src   = [opts.path + "/src/**/*.cpp"];
+  src.push.apply(src, get_excludes(deps, opts, target));
+
   grunt_module.configure("g++", name, {
     coverage: target === "test",
     include:  get_includes(deps, opts, target),
     objects_path: "out/build/" + target,
-    src: [opts.path + "/src/**/*.cpp"]
+    src: src
   });
 
   var target_type = deps.getTypeForTarget(opts.name, target);
@@ -218,7 +241,13 @@ task_gen.configure_test = function configure_test(
     grunt_module, names, opts, deps
 ) {
   var objects = ["out/build/test/" + opts.path + "/**/*.o"];
+  var src = [
+    opts.path + "/src/**/*.cpp",
+    opts.path + "/tests/**/*.cpp"
+  ];
+
   objects.push.apply(objects, get_static_libraries(deps, opts, "test"));
+  src.push.apply(src, get_excludes(deps, opts, "test"));
 
   grunt_module.configure("link++", names.test, {
     libs:  get_libraries(deps, opts, "test"),
@@ -240,10 +269,7 @@ task_gen.configure_test = function configure_test(
   grunt_module.configure("g++", names.test, {
     objects_path: "out/build/test/",
     include: get_includes(deps, opts, "test"),
-    src: [
-      opts.path + "/src/**/*.cpp",
-      opts.path + "/tests/**/*.cpp"
-    ]
+    src: src
   });
 
   grunt_module.configure("shell", names.test, {
