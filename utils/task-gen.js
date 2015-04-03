@@ -77,14 +77,7 @@ var configure_lib_type = function configure_lib_type(
     }]
   });
 
-  grunt_module.configure("ranlib", name, {
-    files: [{
-        dest: "out/dist/" + target + "/" + opts.path + "/" + opts.name + ".a",
-        src:  "out/build/" + target + "/" + opts.path + "/**/*.o"
-    }]
-  });
-
-  tasks.push("ar:" + name, "ranlib:" + name);
+  tasks.push("ar:" + name);
 };
 
 var COFIG_BY_TYPE = {

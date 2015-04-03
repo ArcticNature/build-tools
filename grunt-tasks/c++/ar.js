@@ -37,7 +37,7 @@ module.exports = function(grunt) {
     var children = [];
     for (var idx=0; idx < sources.length; idx++) {
       var source = sources[idx];
-      var args   = ["-rv", path.normalize(source.dest)];
+      var args   = ["-rvs", path.normalize(source.dest)];
       args.push.apply(args, source.src);
 
       children.push(new SubProcess(grunt.log, {

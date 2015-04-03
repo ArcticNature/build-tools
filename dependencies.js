@@ -7,6 +7,7 @@ module.exports = [{
     "logging",
     "state",
     "spawner-channel",
+    "spawner-connector",
     "user-posix"
   ],
   targets: {
@@ -82,6 +83,20 @@ module.exports = [{
   name: "spawner-channel",
   path: "daemon/spawner/channel",
   deps: ["logging", "posix", "utils"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "spawner-connector",
+  path: "daemon/spawner/connectors/connector",
+  deps: ["spawner-channel"],
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },
