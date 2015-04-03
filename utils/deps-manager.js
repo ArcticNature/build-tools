@@ -7,7 +7,7 @@ var filter_priority_target = function filter_priority_target(targets) {
     var target = null;
 
     if (typeof dep === "string") {
-      var parts = dep.split(":");
+      var parts = dep.split(".");
       name   = parts[1];
       target = parts[0];
     } else {
@@ -58,9 +58,9 @@ var merge_arrays = function merge_arrays(left, right) {
 
 var process_dependencies = function process_dependencies(target, deps, global) {
   var apply_default = function apply_default(dep) {
-    var parts = dep.split(":");
+    var parts = dep.split(".");
     if (parts.length === 1) {
-      return (target === "release" ? "release" : "debug") + ":" + dep;
+      return (target === "release" ? "release" : "debug") + "." + dep;
     }
     return dep;
   };
@@ -82,7 +82,7 @@ DepsManager.prototype._depthFirstSearch = function _depthFirstSearch(
   // Mark node as visited.
   results = results || [];
   visited = visited || {};
-  visited[node.target + ":" + node.name] = true;
+  visited[node.target + "." + node.name] = true;
 
   // Visit current node.
   results.push(node);
@@ -91,7 +91,7 @@ DepsManager.prototype._depthFirstSearch = function _depthFirstSearch(
   var nodes = this._projects[node.name].targets[node.target].deps;
   for (var idx=nodes.length-1; idx>=0; idx--) {
     var next_node = nodes[idx];
-    var found = visited[next_node.target + ":" + next_node.name];
+    var found = visited[next_node.target + "." + next_node.name];
 
     if (!found) {
       this._depthFirstSearch(next_node, results, visited);
@@ -187,9 +187,9 @@ DepsManager.prototype.resolveStaticLibraries = function resolveStaticLibraries(
   for (var idx=0; idx<tasks.length; idx++) {
     var task    = tasks[idx];
     var project = this._projects[task.name];
-    var target  = project.targets[task.target];
+    var ptarget = project.targets[task.target];
 
-    if (target.type !== "lib") {
+    if (ptarget.type !== "lib") {
       continue;
     }
 
@@ -199,6 +199,7 @@ DepsManager.prototype.resolveStaticLibraries = function resolveStaticLibraries(
     );
   }
 
+  libs.reverse();
   return libs;
 };
 
@@ -213,6 +214,6 @@ DepsManager.prototype.resolveTasks = function resolveTasks(name, target) {
   });
   tasks.pop();
   return tasks.map(function(task) {
-    return task.target + ":" + task.name;
+    return task.target + "." + task.name;
   });
 };

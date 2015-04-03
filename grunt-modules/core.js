@@ -6,5 +6,6 @@ module.exports = function(grunt_module, deps) {
   configure(grunt_module, deps, "posix");
   configure(grunt_module, deps, "utils");
   configure(grunt_module, deps, "logging");
+  configure(grunt_module, deps, "state");
 
 };

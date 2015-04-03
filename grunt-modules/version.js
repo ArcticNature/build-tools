@@ -40,21 +40,21 @@ module.exports = function(grunt_module, deps) {
   configure_target(grunt_module, config, "release");
   configure_target(grunt_module, config, "test");
 
-  grunt_module.alias("version", "release:version");
-  grunt_module.alias("debug:version",   [
+  grunt_module.alias("version", "release.version");
+  grunt_module.alias("debug.version",   [
     "shell:version.make-version",
     "shell:version.debug"
   ]);
-  grunt_module.alias("release:version", [
+  grunt_module.alias("release.version", [
     "shell:version.make-version",
     "shell:version.release"
   ]);
-  grunt_module.alias("test:version", [
+  grunt_module.alias("test.version", [
     "shell:version.make-version",
     "shell:version.test"
   ]);
-  grunt_module.alias("jenkins:version", [
-    "test:version",
+  grunt_module.alias("jenkins.version", [
+    "test.version",
     "cpplint:version"
   ]);
 };

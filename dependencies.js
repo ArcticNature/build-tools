@@ -19,7 +19,7 @@ module.exports = [{
     debug:   { type: "lib" },
     release: { type: "lib" },
     test:    {
-      deps: ["debug:testing"],
+      deps: ["debug.testing"],
       include: ["3rd-parties/include"],
       libs: ["pthread", "gcov"],
       type: "test"
@@ -34,6 +34,21 @@ module.exports = [{
     debug:   { type: "lib" },
     release: { type: "lib" },
     test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "state",
+  path: "daemon/core/state",
+  deps: ["utils", "version"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      deps: ["test.version"],
       include: ["3rd-parties/include"],
       libs: ["pthread", "gcov"],
       type: "test"
