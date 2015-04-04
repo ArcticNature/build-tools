@@ -2,13 +2,13 @@ module.exports = [{
   name: "daemon",
   path: "daemon/daemon",
   include: ["3rd-parties/include"],
-  libs: ["lua", "gflags"],
+  libs: ["lua-5.2", "gflags"],
   deps: [
     "logging",
     "state",
-    "spawner-channel",
-    "spawner-connector",
-    "user-posix"
+    "spawner",
+    "user-posix",
+    "version"
   ],
   targets: {
     debug:   { type: "bin" },
@@ -16,7 +16,7 @@ module.exports = [{
     test:    {
       deps: ["debug.testing", "test.version"],
       exclude: ["daemon/daemon/src/main.cpp"],
-      include: ["daemon/daemon/tests"],
+      //include: ["daemon/daemon/tests"],
       libs: ["pthread", "gcov"],
       type: "test"
     }
@@ -94,9 +94,59 @@ module.exports = [{
   }
 
 }, {
+  name: "spawner",
+  path: "daemon/spawner/spawner",
+  deps: [
+    "exceptions",
+    "posix",
+    "spawner-connector-local",
+    "spawner-logging",
+    "utils",
+    "version"
+  ],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      deps: ["test.version"],
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
   name: "spawner-connector",
   path: "daemon/spawner/connectors/connector",
-  deps: ["spawner-channel"],
+  deps: ["spawner-channel", "spawner-logging"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "spawner-connector-local",
+  path: "daemon/spawner/connectors/local",
+  deps: ["spawner-connector"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "spawner-logging",
+  path: "daemon/spawner/logging",
+  deps: ["utils", "logging", "spawner-channel"],
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },
@@ -110,9 +160,13 @@ module.exports = [{
 }, {
   name: "testing",
   path: "daemon/core/testing",
+  deps: ["exceptions", "state", "spawner-channel"],
 
   // Manually add logging include path to avoid circular dependency.
-  include: ["daemon/logging/logging/include"],
+  include: [
+    "daemon/logging/logging/include",
+    "daemon/daemon/include"
+  ],
   targets: {
     debug: { type: "lib" }
   }
@@ -139,6 +193,7 @@ module.exports = [{
     debug:   { type: "lib" },
     release: { type: "lib" },
     test:    {
+      deps: ["debug.testing"],
       include: ["3rd-parties/include"],
       libs: ["pthread", "gcov"],
       type: "test"

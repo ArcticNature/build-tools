@@ -25,16 +25,19 @@ var get_static_libraries = function get_static_libraries(deps, opts, target) {
 };
 
 // Keep track of all dependencies seen across all tasks.
-var all_seen_deps = {};
+var last_seen_target = {};
 var tasks_runner = function tasks_runner(grunt, deps, name, target, tasks) {
   return function() {
     var task_deps = deps.resolveTasks(name, target);
     task_deps = task_deps.filter(function(task) {
-      var parts = task.split(".");
-      var name  = parts[1];
-      var seen  = all_seen_deps[name] || false;
-      all_seen_deps[name] = true;
-      return !seen;
+      var parts  = task.split(".");
+      var name   = parts[1];
+      var target = parts[0];
+
+      // Figure out if this project and target is up to date.
+      var same = last_seen_target[name] === target;
+      last_seen_target[name] = target;
+      return !same;
     });
 
     if (task_deps.length > 0) {

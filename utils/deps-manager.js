@@ -1,8 +1,9 @@
 var TARGET_ORDER = ["release", "debug", "test"];
 
-var filter_priority_target = function filter_priority_target(targets) {
+var filter_priority_target = function filter_priority_target(tasks) {
+  // Find highest proiority for each task.
   var priorities = {};
-  targets = targets.map(function(dep) {
+  tasks = tasks.map(function(dep) {
     var name   = null;
     var target = null;
 
@@ -22,8 +23,18 @@ var filter_priority_target = function filter_priority_target(targets) {
     };
   });
 
-  return targets.filter(function(dep) {
-    return priorities[dep.name] === dep.target;
+  // Promote tasks to the highest priority.
+  tasks = tasks.map(function(task) {
+    task.target = priorities[task.name];
+    return task;
+  });
+
+  // Remove duplicate tasks.
+  var seen_tasks = {};
+  return tasks.filter(function(task) {
+    var seen = seen_tasks[task.name];
+    seen_tasks[task.name] = true;
+    return !seen;
   });
 };
 
@@ -84,12 +95,10 @@ DepsManager.prototype._depthFirstSearch = function _depthFirstSearch(
   visited = visited || {};
   visited[node.target + "." + node.name] = true;
 
-  // Visit current node.
-  results.push(node);
-
   // Iterate over linked nodes.
   var nodes = this._projects[node.name].targets[node.target].deps;
-  for (var idx=nodes.length-1; idx>=0; idx--) {
+  //for (var idx=nodes.length-1; idx>=0; idx--) {
+  for (var idx=0; idx<nodes.length; idx++) {
     var next_node = nodes[idx];
     var found = visited[next_node.target + "." + next_node.name];
 
@@ -98,9 +107,9 @@ DepsManager.prototype._depthFirstSearch = function _depthFirstSearch(
     }
   }
 
-  var res = filter_priority_target(results);
-  res.reverse();
-  return res;
+  // Visit current node.
+  results.push(node);
+  return filter_priority_target(results);
 };
 
 DepsManager.prototype.getExcludes = function getExcludes(name, target) {
@@ -164,14 +173,15 @@ DepsManager.prototype.resolveIncludes = function resolveIncludes(name, target) {
     name:   name,
     target: target
   });
-  var current  = tasks.pop();
+
   var includes = [];
-  includes.push.apply(
-      includes, this._projects[current.name].targets[current.target].include
-  );
+  includes.push.apply(includes, this._projects[name].targets[target].include);
 
   for (var idx=0; idx<tasks.length; idx++) {
     var task = tasks[idx];
+    if (task.name === name && task.target === target) {
+      continue;
+    }
     includes.push(this._projects[task.name].path + "/include");
   }
 
@@ -198,7 +208,6 @@ DepsManager.prototype.resolveStaticLibraries = function resolveStaticLibraries(
     name:   name,
     target: target
   });
-  tasks.pop();
 
   var libs = [];
   for (var idx=0; idx<tasks.length; idx++) {
@@ -206,7 +215,9 @@ DepsManager.prototype.resolveStaticLibraries = function resolveStaticLibraries(
     var project = this._projects[task.name];
     var ptarget = project.targets[task.target];
 
-    if (ptarget.type !== "lib") {
+    if (ptarget.type !== "lib" || (
+        task.name === name && task.target === target
+      )) {
       continue;
     }
 
@@ -228,8 +239,10 @@ DepsManager.prototype.resolveTasks = function resolveTasks(name, target) {
   var tasks = this._depthFirstSearch({
     name:   name,
     target: target
+  }).filter(function(task) {
+    return task.name !== name || task.target !== target;
   });
-  tasks.pop();
+
   return tasks.map(function(task) {
     return task.target + "." + task.name;
   });
