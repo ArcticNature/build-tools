@@ -18,6 +18,32 @@ module.exports.push({
 });
 
 
+// Configuration projects.
+module.exports.push({
+  name: "configuration",
+  path: "daemon/configuration/configuration",
+  deps: [
+    "events",
+    "events-source-internal",
+    "exceptions",
+    "logging",
+    "state",
+    "version"
+  ],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      deps: ["debug.testing", "test.version"],
+      include: ["3rd-parties/include"],
+      libs: ["lua-5.2", "pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+});
+
+
 // Core projects.
 module.exports.push({
   name: "daemon",
@@ -25,12 +51,14 @@ module.exports.push({
   libs: ["lua-5.2", "gflags"],
   deps: [
     "cmd-line-parser",
+    "configuration",
     "events",
     "events-source-internal",
     "logging",
     "state",
     "spawner",
     "user-posix",
+    "utils",
     "version"
   ],
   targets: {
@@ -48,6 +76,19 @@ module.exports.push({
 }, {
   name: "exceptions",
   path: "daemon/core/exceptions",
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "injector",
+  path: "daemon/core/injector",
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },
@@ -87,7 +128,7 @@ module.exports.push({
 }, {
   name: "testing",
   path: "daemon/core/testing",
-  deps: ["exceptions", "repo", "state", "spawner-channel"],
+  deps: ["cmd-line-parser", "exceptions", "repo", "state", "spawner-channel"],
 
   // Manually add logging include path to avoid circular dependency.
   include: [
@@ -271,7 +312,9 @@ module.exports.push({
   name: "service",
   path: "daemon/services/service",
   include: ["daemon/core/state/include"],
-  deps: ["logging", "repo", "spawner-channel", "utils"],
+  deps: [
+    "injector", "logging", "repo", "spawner-channel", "utils"
+  ],
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },

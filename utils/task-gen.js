@@ -1,6 +1,7 @@
 var path = require("path");
-var task_gen   = module.exports = {};
-var GCOVR_PATH = path.resolve("build-tools/gcovr");
+var task_gen    = module.exports = {};
+var DepsManager = require("./deps-manager");
+var GCOVR_PATH  = path.resolve("build-tools/gcovr");
 
 
 var get_excludes = function get_excludes(deps, opts, target) {
@@ -35,9 +36,10 @@ var tasks_runner = function tasks_runner(grunt, deps, name, target, tasks) {
       var target = parts[0];
 
       // Figure out if this project and target is up to date.
-      var same = last_seen_target[name] === target;
-      last_seen_target[name] = target;
-      return !same;
+      var highest_name = DepsManager.maxTarget(last_seen_target[name], target);
+      var run_highest = last_seen_target[name] === highest_name;
+      last_seen_target[name] = highest_name;
+      return !run_highest;
     });
 
     if (task_deps.length > 0) {

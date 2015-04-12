@@ -1,5 +1,6 @@
 var TARGET_ORDER = ["release", "debug", "test"];
 
+
 var filter_priority_target = function filter_priority_target(tasks) {
   // Find highest proiority for each task.
   var priorities = {};
@@ -16,7 +17,7 @@ var filter_priority_target = function filter_priority_target(tasks) {
       target = dep.target;
     }
 
-    priorities[name] = max_target(priorities[name], target);
+    priorities[name] = DepsManager.maxTarget(priorities[name], target);
     return {
       name:   name,
       target: target
@@ -36,12 +37,6 @@ var filter_priority_target = function filter_priority_target(tasks) {
     seen_tasks[task.name] = true;
     return !seen;
   });
-};
-
-var max_target = function max_target(left, right) {
-  var l = TARGET_ORDER.indexOf(left);
-  var r = TARGET_ORDER.indexOf(right);
-  return l > r ? left : right;
 };
 
 var merge_arrays = function merge_arrays(left, right) {
@@ -85,6 +80,12 @@ var process_dependencies = function process_dependencies(target, deps, global) {
 var DepsManager = module.exports = function DepsManager(grunt) {
   this._grunt    = grunt;
   this._projects = {};
+};
+
+DepsManager.maxTarget = function maxTarget(left, right) {
+  var l = TARGET_ORDER.indexOf(left);
+  var r = TARGET_ORDER.indexOf(right);
+  return l > r ? left : right;
 };
 
 DepsManager.prototype._depthFirstSearch = function _depthFirstSearch(
