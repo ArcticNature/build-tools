@@ -15,15 +15,32 @@ module.exports.push({
       type: "test"
     }
   }
+
+}, {
+  name: "cmd-line-parser-gflags",
+  path: "daemon/cmd-line-parsers/gflags",
+  libs: ["gflags"],
+  deps: ["cmd-line-parser", "exceptions", "repo", "repo-file"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
 });
 
 
 // Configuration projects.
 module.exports.push({
   name: "configuration",
+  libs: ["lua-5.2"],
   path: "daemon/configuration/configuration",
   deps: [
     "events",
+    "events-manager-epoll",
     "events-source-internal",
     "exceptions",
     "logging",
@@ -36,7 +53,7 @@ module.exports.push({
     test:    {
       deps: ["debug.testing", "test.version"],
       include: ["3rd-parties/include"],
-      libs: ["lua-5.2", "pthread", "gcov"],
+      libs: ["pthread", "gcov"],
       type: "test"
     }
   }
@@ -51,10 +68,13 @@ module.exports.push({
   libs: ["lua-5.2", "gflags"],
   deps: [
     "cmd-line-parser",
+    "cmd-line-parser-gflags",
     "configuration",
     "events",
     "events-source-internal",
     "logging",
+    "repo",
+    "repo-file",
     "state",
     "spawner",
     "user-posix",
@@ -190,6 +210,21 @@ module.exports.push({
   }
 
 }, {
+  name: "events-manager-epoll",
+  path: "daemon/events/managers/epoll",
+  deps: ["exceptions", "events", "state"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      deps: ["debug.testing"],
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
   name: "events-source-internal",
   path: "daemon/events/sources/internal",
   deps: ["events", "state"],
@@ -261,6 +296,20 @@ module.exports.push({
 module.exports.push({
   name: "repo",
   path: "daemon/repositories/repository",
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "repo-file",
+  path: "daemon/repositories/file",
+  deps: ["exceptions", "logging", "repo", "state", "version"],
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },
