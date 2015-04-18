@@ -71,6 +71,7 @@ module.exports.push({
     "cmd-line-parser-gflags",
     "configuration",
     "events",
+    "events-manager-epoll",
     "events-source-internal",
     "logging",
     "repo",
@@ -212,14 +213,17 @@ module.exports.push({
 }, {
   name: "events-manager-epoll",
   path: "daemon/events/managers/epoll",
-  deps: ["exceptions", "events", "state"],
+  deps: [
+    "configuration", "exceptions", "events",
+    "injector", "state"
+  ],
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },
     test:    {
       deps: ["debug.testing"],
       include: ["3rd-parties/include"],
-      libs: ["pthread", "gcov"],
+      libs: ["lua-5.2", "pthread", "gcov"],
       type: "test"
     }
   }
