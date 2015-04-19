@@ -77,6 +77,7 @@ module.exports.push({
     "repo",
     "repo-file",
     "state",
+    "service-local",
     "spawner",
     "user-posix",
     "utils",
@@ -364,9 +365,9 @@ module.exports.push({
 module.exports.push({
   name: "service",
   path: "daemon/services/service",
-  include: ["daemon/core/state/include"],
   deps: [
-    "injector", "logging", "repo", "spawner-channel", "utils"
+    "injector", "logging", "repo", "state",
+    "spawner-channel", "utils"
   ],
   targets: {
     debug:   { type: "lib" },
@@ -375,6 +376,21 @@ module.exports.push({
       deps: ["state"],
       include: ["3rd-parties/include"],
       libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "service-local",
+  path: "daemon/services/local",
+  deps: ["configuration", "spawner-connector-local", "service"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      deps: ["state"],
+      include: ["3rd-parties/include"],
+      libs: ["lua-5.2", "pthread", "gcov"],
       type: "test"
     }
   }
