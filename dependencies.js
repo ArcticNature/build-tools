@@ -44,6 +44,8 @@ module.exports.push({
     "events-source-internal",
     "exceptions",
     "logging",
+    "repo",
+    "service",
     "state",
     "version"
   ],
@@ -71,6 +73,7 @@ module.exports.push({
     "cmd-line-parser-gflags",
     "configuration",
     "events",
+    "events-service",
     "events-manager-epoll",
     "events-source-internal",
     "logging",
@@ -188,18 +191,34 @@ module.exports.push({
 
 
 // Events projects.
+// TODO(stefano): move commands out of events and into events-builtin.
+// TODO(stefano): move service commands from daemon to events-builtin.
 module.exports.push({
   name: "events",
   path: "daemon/events/core",
   deps: [
     "exceptions",
-    "spawner-channel",
+    "logging",
     "serialiser",
-    "serialiser-json",
-    "service",
-    "state",
-    "user-posix",
-    "utils"
+    "state"
+  ],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "events-service",
+  path: "daemon/events/service",
+  deps: [
+    "configuration",
+    "events",
+    "service"
   ],
   targets: {
     debug:   { type: "lib" },
