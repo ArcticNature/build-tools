@@ -232,7 +232,8 @@ module.exports.push({
 }, {
   name: "events-source-internal",
   path: "daemon/events/sources/internal",
-  deps: ["events", "state"],
+  libs: ["lua-5.2"],
+  deps: ["configuration", "events", "state"],
   targets: {
     debug:   { type: "lib" },
     release: { type: "lib" },
