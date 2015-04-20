@@ -8,7 +8,9 @@ module.exports = function(grunt_module, deps) {
   configure(grunt_module, deps, "utils");
   configure(grunt_module, deps, "logging");
   configure(grunt_module, deps, "state");
+
   configure(grunt_module, deps, "configuration");
+  configure(grunt_module, deps, "configuration-autostart");
 
   // Extentions to core.
   configure(grunt_module, deps, "user-posix");

@@ -60,6 +60,22 @@ module.exports.push({
     }
   }
 
+}, {
+  name: "configuration-autostart",
+  libs: ["lua-5.2"],
+  path: "daemon/configuration/autostart",
+  deps: ["configuration"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      deps: ["debug.testing", "test.version"],
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
 });
 
 
@@ -72,6 +88,7 @@ module.exports.push({
     "cmd-line-parser",
     "cmd-line-parser-gflags",
     "configuration",
+    "configuration-autostart",
     "events",
     "events-service",
     "events-manager-epoll",
@@ -191,8 +208,6 @@ module.exports.push({
 
 
 // Events projects.
-// TODO(stefano): move commands out of events and into events-builtin.
-// TODO(stefano): move service commands from daemon to events-builtin.
 module.exports.push({
   name: "events",
   path: "daemon/events/core",
