@@ -93,6 +93,7 @@ module.exports.push({
     "events-service",
     "events-manager-epoll",
     "events-source-internal",
+    "events-source-tcp",
     "logging",
     "repo",
     "repo-file",
@@ -272,6 +273,22 @@ module.exports.push({
     debug:   { type: "lib" },
     release: { type: "lib" },
     test:    {
+      include: ["3rd-parties/include"],
+      libs: ["pthread", "gcov"],
+      type: "test"
+    }
+  }
+
+}, {
+  name: "events-source-tcp",
+  path: "daemon/events/sources/tcp",
+  libs: ["lua-5.2"],
+  deps: ["configuration", "events", "events-service", "state"],
+  targets: {
+    debug:   { type: "lib" },
+    release: { type: "lib" },
+    test:    {
+      deps: ["debug.testing"],
       include: ["3rd-parties/include"],
       libs: ["pthread", "gcov"],
       type: "test"

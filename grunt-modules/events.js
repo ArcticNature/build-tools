@@ -6,5 +6,6 @@ module.exports = function(grunt_module, deps) {
   configure(grunt_module, deps, "events-service");
   configure(grunt_module, deps, "events-manager-epoll");
   configure(grunt_module, deps, "events-source-internal");
+  configure(grunt_module, deps, "events-source-tcp");
 
 };
