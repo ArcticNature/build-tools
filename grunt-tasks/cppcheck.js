@@ -25,7 +25,7 @@ module.exports = function(grunt) {
     var args = [];
     args.push.apply(args, options.include.map(prefix("-I")));
     args.push.apply(args, options.exclude.map(prefix("-i")));
-    args.push("--enable=" + options.enable, "--xml");
+    args.push("--enable=" + options.enable, "--xml", "--xml-version=2");
     args.push.apply(args, files);
 
     // Spawn command.
