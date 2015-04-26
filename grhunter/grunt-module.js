@@ -61,7 +61,7 @@ GruntModule.prototype.aliasMore = function aliasMore(name, items) {
 
 GruntModule.prototype.configure = function configure(task, subtask, config) {
   if (config === undefined) {
-    return this._configureTask(task, config);
+    return this._configureTask(task, subtask);
   }
   return this._configureMultiTask(task, subtask, config);
 };
@@ -76,4 +76,11 @@ GruntModule.prototype.loadTasks = function loadTasks(task) {
 
 GruntModule.prototype.loadNpmTasks = function loadNpmTasks(task) {
   this._load_npm[task] = true;
+};
+
+GruntModule.prototype.registerTask = function registerTask(name, task) {
+  if (name in this._alias || name in this._alias_more) {
+    throw new Error("Task " + name + " already defined");
+  }
+  this.alias(name, task);
 };
