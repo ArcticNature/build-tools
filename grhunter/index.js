@@ -100,6 +100,17 @@ GrHunter.prototype._forEachInObject = function _forEachInObject(
   }
 };
 
+/**
+ * @returns {!GruntModule} The intenral GrHunter module used to proxy global
+ *                         configurations.
+ */
+GrHunter.prototype._getInternalModule = function _getInternalModule() {
+  if (!("__internal__" in this._modules)) {
+    this.addModule("__internal__");
+  }
+  return this._modules["__internal__"];
+};
+
 GrHunter.prototype._loadTasks = function _loadTasks() {
   var loaded_modules = {};
   this._forEachInObject("_load", function(task) {
@@ -149,6 +160,22 @@ GrHunter.prototype.loadModule = function loadModule(
   args.push.apply(args, Array.prototype.slice.call(arguments, 1));
   args.push(this);
   node_module.apply(node_module, args);
+};
+
+/**
+ * Add tasks to be loaded when the configuration is composed.
+ * @param {!String} task The name of the local module to load.
+ */
+GrHunter.prototype.loadTasks = function loadTasks(task) {
+  this._getInternalModule().loadTasks(task);
+};
+
+/**
+ * Add NPM tasks to be loaded when the configuration is composed.
+ * @param {!String} task The name of the NPM module to load.
+ */
+GrHunter.prototype.loadNpmTasks = function loadNpmTasks(task) {
+  this._getInternalModule().loadNpmTasks(task);
 };
 
 GrHunter.prototype.package = function package(pkg) {

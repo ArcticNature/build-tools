@@ -8,7 +8,7 @@ var verify = module.exports = {};
  */
 verify.array = function array(value, message) {
   if (!Array.isArray(value)) {
-    throw Error(message);
+    throw new Error(message);
   }
 };
 
@@ -19,7 +19,7 @@ verify.array = function array(value, message) {
  */
 verify.notEmptyString = function notEmptyString(value, message) {
   if (typeof value !== "string" || value === "") {
-    throw Error(message);
+    throw new Error(message);
   }
 };
 
@@ -30,7 +30,7 @@ verify.notEmptyString = function notEmptyString(value, message) {
  */
 verify.notNullObject = function notNullObject(value, message) {
   if (typeof value !== "object" || value === null) {
-    throw Error(message);
+    throw new Error(message);
   }
 };
 

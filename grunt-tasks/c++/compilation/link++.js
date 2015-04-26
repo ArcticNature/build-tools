@@ -2,9 +2,22 @@ module.exports = function(grunt) {
   var fs   = require("fs");
   var path = require("path");
 
-  var SubProcess = require("../../utils/subprocess");
+  var SubProcess  = require("../../../utils/subprocess");
+  var extend_args = function extend_args(args, check, to_add) {
+    if (check) {
+      args.push.apply(args, to_add);
+    }
+  };
 
-  grunt.registerMultiTask("ar", "Archive object files.", function() {
+  grunt.registerMultiTask("link++", "G++ link object files.", function() {
+    // Prepare task and options.
+    var options = this.options({
+      debug: true,
+      libs:  null,
+      coverage: true,
+      optimise: null
+    }, this.data);
+
     // Find files to process.
     var sources = this.files.filter(function(source) {
       try {
@@ -37,12 +50,28 @@ module.exports = function(grunt) {
     var children = [];
     for (var idx=0; idx < sources.length; idx++) {
       var source = sources[idx];
-      var args   = ["-rvs", path.normalize(source.dest)];
-      args.push.apply(args, source.src);
+      var args   = [];
 
+      // Options.
+      extend_args(args, options.debug, ["-g"]);
+      extend_args(args, options.coverage, [
+        "-fprofile-arcs", "-ftest-coverage", "-rdynamic"
+      ]);
+      extend_args(args, options.optimise !== null, ["-O" + options.optimise]);
+
+      // Libs.
+      if (Array.isArray(options.libs) && options.libs.length > 0) {
+        args.push.apply(args, options.libs.map(function(lib) {
+          return "-l" + path.normalize(lib);
+        }));
+      }
+
+      // Source files.
+      args.push("-o", path.normalize(source.dest));
+      args.push.apply(args, source.src);
       children.push(new SubProcess(grunt.log, {
         args: args,
-        cmd:  "ar"
+        cmd:  "g++"
       }));
     }
 

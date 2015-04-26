@@ -1,5 +1,5 @@
 module.exports = function(grunt) {
-  var SubProcess = require("../utils/subprocess");
+  var SubProcess = require("../../../utils/subprocess");
   var DEFAULT_OPTIONS = {
     cwd: null,
     exclude: null,

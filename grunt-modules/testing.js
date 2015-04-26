@@ -20,12 +20,6 @@ module.exports = function(grunt_module, deps) {
     debug: opts.name + ".debug"
   };
 
-  // Request modules.
-  grunt_module.loadTasks("build-tools/grunt-tasks");
-  grunt_module.loadTasks("build-tools/grunt-tasks/c++");
-  grunt_module.loadNpmTasks("grunt-contrib-clean");
-  grunt_module.loadNpmTasks("grunt-shell");
-
   // Configure tasks.
   task_gen.configure_clean(grunt_module, names, opts);
   task_gen.configure_cxx_target("debug", grunt_module, names.debug, opts, deps);

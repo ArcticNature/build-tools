@@ -1,5 +1,5 @@
 var Q = require("q");
-var SubProcess = require("../utils/subprocess");
+var SubProcess = require("../../../utils/subprocess");
 
 
 module.exports = function(grunt) {

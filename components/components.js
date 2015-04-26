@@ -34,13 +34,13 @@ Components.prototype._findComponentDeps = function _findComponentDeps(
   deps.forEach(function(dep) {
     // Check if dependency exists.
     if (!_this.has(dep.name)) {
-      throw Error(
+      throw new Error(
           "Component '" + component_name + "' needs missing dependency '"
           + dep.name + "'"
       );
     }
     if (!_this._components[dep.name].hasTarget(dep.target)) {
-      throw Error(
+      throw new Error(
           "Component '" + component_name + "' needs missing target '" +
           dep.target + "' for dependency '" + dep.name + "'"
       );
@@ -57,7 +57,7 @@ Components.prototype._findComponentDeps = function _findComponentDeps(
     );
     found_deps.forEach(function(found_dep) {
       if (found_dep === component_name) {
-        throw Error(
+        throw new Error(
             "Detected mutual dependency between '" +
             component_name + "' and '" + dep.name + "'"
         );
@@ -73,19 +73,33 @@ Components.prototype._findComponentDeps = function _findComponentDeps(
  */
 Components.prototype.add = function add(component) {
   if (!component) {
-    throw Error("Need a component to add");
+    throw new Error("Need a component to add");
   }
   if (!(component instanceof Component)) {
-    throw Error("Can only add Component instances");
+    throw new Error("Can only add Component instances");
   }
 
   var name = component.name();
 
   if (this.has(name)) {
-    throw Error("Component '" + name + "' is already known");
+    throw new Error("Component '" + name + "' is already known");
   }
 
   this._components[component.name()] = component;
+};
+
+/**
+ * Returns a component from the collection.
+ * @param {!String} component The component to get.
+ * @returns {!Component} A Component instance.
+ */
+Components.prototype.get = function get(component) {
+  if (component) {
+    if (!this.has(component)) {
+      throw new Error("Missing component '" + component + "'");
+    }
+  }
+  return this._components[component];
 };
 
 /**
@@ -96,6 +110,13 @@ Components.prototype.add = function add(component) {
 Components.prototype.has = function has(name) {
   verify.notEmptyString(name, "Need a component name to check for");
   return name in this._components;
+};
+
+/**
+ * @returns {!Array.<!String>} list of components in the collection.
+ */
+Components.prototype.list = function list() {
+  return Object.keys(this._components).sort();
 };
 
 /**
@@ -115,7 +136,7 @@ Components.prototype.resolve = function resolve(
   );
 
   if (!this.has(name)) {
-    throw Error("Undefined dependent component '" + name + "'");
+    throw new Error("Undefined dependent component '" + name + "'");
   }
 
   var _this = this;
@@ -127,7 +148,7 @@ Components.prototype.resolve = function resolve(
   deps.forEach(function(dep) {
     if (dep.name in processed_components) {
       if (dep.target !== processed_components[dep.name]) {
-        throw Error(
+        throw new Error(
             "Ambiguous dependency for component '" + dep.name + "' " +
             "Found targets '" + processed_components[dep.name] + "' and '" +
             deps.target + "' but only one is allowed"
@@ -156,7 +177,7 @@ Components.prototype.verifyTarget = function verifyTarget(target) {
   verify.notEmptyString(target, "The target to verify must be a string");
 
   var _this = this;
-  var component_names = Object.keys(this._components).sort();
+  var component_names = this.list();
   var known_components = {};
 
   component_names.forEach(function(component_name) {

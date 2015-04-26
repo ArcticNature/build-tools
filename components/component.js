@@ -56,7 +56,7 @@ Component.parseDependencyName = function parseDependencyName(name, target) {
     };
   }
 
-  throw Error("Cannot parse malformed dependency '" + name + "'");
+  throw new Error("Cannot parse malformed dependency '" + name + "'");
 };
 
 /**
@@ -73,7 +73,7 @@ Component.checkDependenciesList = function checkDependenciesList(
   var components = {};
   dependencies.forEach(function(dep) {
     if (dep.name in components && components[dep.name] !== dep.target) {
-      throw Error("Ambiguous dependency for component '" + dep.name + "'");
+      throw new Error("Ambiguous dependency for component '" + dep.name + "'");
     }
     components[dep.name] = dep.target;
   });
@@ -135,11 +135,20 @@ Component.prototype._process_targets = function _process_targets(config) {
 Component.prototype.dependencies = function dependencies(name) {
   verify.notEmptyString(name, "Target name must be a string");
   if (!(name in this._targets)) {
-    throw Error("Missing target '" + name + "' for '" + this._name + "'");
+    throw new Error("Missing target '" + name + "' for '" + this._name + "'");
   }
 
   var target = this._targets[name];
   return target.deps;
+};
+
+/**
+ * Returns the path to run the clean task against
+ * @param {!String} target The target to get the path for.
+ * @returns {!String}
+ */
+Component.prototype.getCleanPath = function getCleanPath(target) {
+  throw new Error("Method not implemented");
 };
 
 /**

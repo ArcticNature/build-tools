@@ -3,7 +3,7 @@ module.exports = function(grunt) {
   var fs   = require("fs");
   var path = require("path");
 
-  var SubProcess  = require("../../utils/subprocess");
+  var SubProcess  = require("../../../utils/subprocess");
   var extend_args = function extend_args(args, check, to_add) {
     if (check) {
       args.push.apply(args, to_add);
