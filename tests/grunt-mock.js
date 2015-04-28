@@ -1,4 +1,5 @@
 var assert = require("assert");
+var grunt  = require("grunt");
 
 
 /**
@@ -115,6 +116,9 @@ var GruntMock = module.exports = function GruntMock() {
 
   this.config = (new GruntConfigMock()).createCallable();
   this.task   = new GruntTaskMock();
+
+  // Not everything needs mocking.
+  this.template = grunt.template;
 };
 
 

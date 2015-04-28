@@ -14,21 +14,56 @@ var ScriptsComponent = module.exports = function ScriptsComponent(
     configuration
 ) {
   Component.call(this, configuration);
-  verify.notEmptyString(configuration.path, "Missing component path");
-  //verify.notNullObject(configuration.grunt, "Grunt instance not valid");
+  this._validate(configuration);
 
+  // Store configuration.
   this._grunt = configuration.grunt;
   this._path  = configuration.path;
-  this._clear_path = configuration.clear_path;
+  this._clear_path = configuration["clear-path"];
 };
 ScriptsComponent.prototype = Object.create(Component.prototype);
 
+/**
+ * Expands a string (or array of strings) through grunt's template.
+ * @param {!String|!Array.<!String>} template The array/string to process.
+ * @param {!String} target The target to process for.
+ * @returns {!String|!Array.<!String>} The expanded array/string.
+ */
 ScriptsComponent.prototype._template = function _template(template, target) {
-  var data = {
+  var grunt = this._grunt;
+  var data  = {
     path: this._path,
     target: target
   };
+
+  // If we are expanding an array, process each item.
+  if (Array.isArray(template)) {
+    return template.map(function(element) {
+      return grunt.template.process(element, { data: data });
+    });
+  }
+
+  // Otherwise just process the template.
   return this._grunt.template.process(template, { data: data });
+};
+
+/**
+ * Validates the configuration.
+ * @param {!Object} configuration The configuration to validate.
+ */
+ScriptsComponent.prototype._validate = function _validate(configuration) {
+  verify.notNullObject(configuration.grunt, "Grunt instance not valid");
+  verify.notEmptyString(configuration.path, "Component path not valid");
+
+  // Clear-path is either array or array of strings.
+  var clear_path = configuration["clear-path"];
+  if (Array.isArray(clear_path)) {
+    clear_path.forEach(function (path) {
+      verify.notEmptyString(path, "Component clear-path contains invalid path");
+    });
+  } else {
+    verify.notEmptyString(clear_path, "Component clear-path not valid");
+  }
 };
 
 //@override

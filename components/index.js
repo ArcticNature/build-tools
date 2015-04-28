@@ -30,7 +30,8 @@ index.loadFiles = function loadFiles(files, grunt) {
     }
 
     var constructor = TYPES[type];
-    config.path = config.path || path.dirname(source);
+    config.path  = config.path  || path.dirname(source);
+    config.grunt = config.grunt || grunt;
     components.add(new constructor(config));
   });
 

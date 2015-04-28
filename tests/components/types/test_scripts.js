@@ -1,0 +1,83 @@
+var assert = require("assert");
+var mocha  = require("mocha");
+
+var GruntMock = require("../../grunt-mock");
+var ScriptsComponent = require("../../../components/types/scripts");
+
+
+suite("ScriptsComponent", function() {
+  setup(function() {
+    var grunt = this.grunt = new GruntMock();
+    this.make = function make(config) {
+      config = Object.create(config);
+      config.grunt = grunt;
+      config.name  = "test";
+      config.path  = "/test";
+      return new ScriptsComponent(config);
+    };
+  });
+
+  suite("Constructor", function() {
+    test("fails if grunt is missing", function() {
+      var block = function() {
+        new ScriptsComponent({ name: "a" });
+      };
+      assert.throws(block, /Grunt instance not valid/);
+    });
+
+    test("fails if path is missing", function() {
+      var grunt = this.grunt;
+      var block = function() {
+        new ScriptsComponent({
+          name: "a",
+          grunt: grunt
+        });
+      };
+      assert.throws(block, /Component path not valid/);
+    });
+
+    test("fails if clear-path is missing", function() {
+      var grunt = this.grunt;
+      var block = function() {
+        new ScriptsComponent({
+          name:  "a",
+          path:  "/path",
+          grunt: grunt
+        });
+      };
+      assert.throws(block, /Component clear-path not valid/);
+    });
+  });
+
+  suite("Clear path", function() {
+    test("constant array is returned unchanged", function() {
+      var component = this.make({
+        "clear-path": ["abc", "def"]
+      });
+      assert.deepEqual(component.getCleanPath("test"), ["abc", "def"]);
+    });
+
+    test("constant string is returned unchanged", function() {
+      var component = this.make({
+        "clear-path": "abc"
+      });
+      assert.strictEqual(component.getCleanPath("test"), "abc");
+    });
+
+    test("template array is processed", function() {
+      var component = this.make({
+        "clear-path": ["a<%= path %>b", "c<%= target %>d"]
+      });
+      assert.deepEqual(component.getCleanPath("debug"), ["a/testb", "cdebugd"]);
+    });
+
+    test("template string is processed", function() {
+      var component = this.make({
+        "clear-path": "<%= path %>"
+      });
+      assert.strictEqual(component.getCleanPath("test"), "/test");
+    });
+  });
+
+  //
+});

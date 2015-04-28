@@ -2,7 +2,7 @@
  * Extends Mocha TDD ui with the gruntSuite method for testing Grunt tasks.
  */
 var mocha = module.exports = require("mocha");
-var GruntMock = require("./grunt-mock");
+var GruntMock = require("../grunt-mock");
 
 
 global.gruntSuite = function gruntSuite(name, path, callback) {
