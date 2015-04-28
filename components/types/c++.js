@@ -1,7 +1,7 @@
 var path = require("path");
 
-var Component = require("./component");
-var verify = require("../utils/verify");
+var Component = require("../component");
+var verify = require("../../utils/verify");
 
 
 /**
@@ -20,5 +20,8 @@ CppComponent.prototype = Object.create(Component.prototype);
 
 //@override
 CppComponent.prototype.getCleanPath = function getCleanPath(target) {
-  return path.join("out", "*", target, this._path);
+  return [
+    path.join("out", "build", target, this._path),
+    path.join("out", "dist",  target, this._path)
+  ];
 };

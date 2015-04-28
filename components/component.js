@@ -172,5 +172,5 @@ Component.prototype.name = function name() {
  * @returns {!Array} The list of targets defined for the component.
  */
 Component.prototype.targets = function targets() {
-  return Object.keys(this._targets);
+  return Object.keys(this._targets).sort();
 };

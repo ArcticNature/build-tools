@@ -10,8 +10,6 @@
  * Note that the task is not call clean to avoid clashing with the
  * grunt-contrib-clean task.
  */
-
-
 module.exports = function(grunt) {
   /**
    * Clear all components.
@@ -22,6 +20,10 @@ module.exports = function(grunt) {
     all_components.forEach(function(component) {
       clear_component(components.get(component));
     });
+
+    // Clean ./out
+    grunt.config("clean.out-dir", "out/");
+    grunt.task.run("clean:out-dir");
   };
 
   /**
@@ -41,16 +43,17 @@ module.exports = function(grunt) {
    * @param {!String}    target    The target to clear.
    */
   var clear_target = function clear_target(component, target) {
+    var name = component.name();
+
     if (!component.hasTarget(target)) {
       throw new Error(
-          "Missing target '" + target + "' for component '" +
-          component.name() + "'"
+          "Missing target '" + target + "' for component '" + name + "'"
       );
     }
 
-    var name = component.name() + "\\." + target;
     var path = component.getCleanPath(target);
-    grunt.config("clean." + name, path);
+    grunt.config("clean." + name + "\\." + target, path);
+    grunt.task.run("clean:" + component.name() + "." + target);
   };
 
   // Register the task with grunt.

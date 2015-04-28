@@ -78,7 +78,7 @@ GruntModule.prototype.loadNpmTasks = function loadNpmTasks(task) {
   this._load_npm[task] = true;
 };
 
-GruntModule.prototype.registerTask = function registerTask(name, task) {
+GruntModule.prototype.registerTask = function registerTask(name, desc, task) {
   if (name in this._alias || name in this._alias_more) {
     throw new Error("Task " + name + " already defined");
   }

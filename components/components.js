@@ -120,6 +120,30 @@ Components.prototype.list = function list() {
 };
 
 /**
+ * Generates the dependency graph in DOT format.
+ * @param {!String} target Name of the target configuration to plot.
+ * @returns {!String} DOT source of the graph.
+ */
+Components.prototype.plot = function plot(target) {
+  var _this = this;
+  var components = this.list();
+  var graph = "digraph {\n";
+
+  components.forEach(function(name) {
+    var component = _this.get(name);
+    var deps = component.dependencies(target);
+
+    graph += "  ";
+    deps.forEach(function(dep) {
+      graph += dep.name + " -> ";
+    });
+    graph += name + "\n";
+  });
+
+  return graph + "}\n";
+};
+
+/**
  * Processes dependencies for the requested target.
  * @param {!String} name   The component to resolve.
  * @param {!String} target The target to resolve.

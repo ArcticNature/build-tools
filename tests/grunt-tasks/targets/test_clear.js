@@ -1,9 +1,8 @@
 var assert = require("assert");
 var mocha  = require("../grunt-suite");
 
-//var Component  = require("../../../components/component");
 var Components   = require("../../../components/components");
-var CppComponent = require("../../../components/c++");
+var CppComponent = require("../../../components/types/c++");
 
 
 gruntSuite("Clear grunt task", "targets/clear", function() {
@@ -29,41 +28,49 @@ gruntSuite("Clear grunt task", "targets/clear", function() {
   test("clean tasks are added for all components", function() {
     this.grunt.testTask("clear");
 
-    assert.equal(
+    assert.deepEqual(
         this.grunt.config.get("clean.a\\.debug"),
-        "out/*/debug/a/b/c"
+        ["out/build/debug/a/b/c", "out/dist/debug/a/b/c"]
     );
-    assert.equal(
+    assert.deepEqual(
         this.grunt.config.get("clean.a\\.release"),
-        "out/*/release/a/b/c"
+        ["out/build/release/a/b/c", "out/dist/release/a/b/c"]
     );
-    assert.equal(
+    assert.deepEqual(
         this.grunt.config.get("clean.b\\.test"),
-        "out/*/test/a/b/c"
+        ["out/build/test/a/b/c", "out/dist/test/a/b/c"]
     );
+    this.grunt.task.assertTaskQueue([
+      "clean:a.debug",
+      "clean:a.release",
+      "clean:b.test",
+      "clean:out-dir"
+    ]);
   });
 
   test("clean tasks are added for specific component", function() {
     this.grunt.testTask("clear", "a");
 
-    assert.equal(
+    assert.deepEqual(
         this.grunt.config.get("clean.a\\.debug"),
-        "out/*/debug/a/b/c"
+        ["out/build/debug/a/b/c", "out/dist/debug/a/b/c"]
     );
-    assert.equal(
+    assert.deepEqual(
         this.grunt.config.get("clean.a\\.release"),
-        "out/*/release/a/b/c"
+        ["out/build/release/a/b/c", "out/dist/release/a/b/c"]
     );
+    this.grunt.task.assertTaskQueue(["clean:a.debug", "clean:a.release"]);
   });
 
   test("clean task is added for specific component and target", function() {
     this.grunt.testTask("clear", "a", "release");
 
     assert.equal(this.grunt.config.get("clean.a\\.debug"), null);
-    assert.equal(
+    assert.deepEqual(
         this.grunt.config.get("clean.a\\.release"),
-        "out/*/release/a/b/c"
+        ["out/build/release/a/b/c", "out/dist/release/a/b/c"]
     );
+    this.grunt.task.assertTaskQueue(["clean:a.release"]);
   });
 
   test("fails if component does not exists", function() {

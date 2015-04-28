@@ -3,7 +3,7 @@ var assert = require("assert");
 
 /**
  * @class GruntConfigMock
- * Mocks grunt.config instance.
+ * Mocks the grunt.config instance.
  */
 var GruntConfigMock = function GruntConfigMock() {
   this._config = {};
@@ -78,6 +78,35 @@ GruntConfigMock.prototype.smartAccess = function smartAccess(name, value) {
 
 
 /**
+ * @class GruntTaskMock
+ * Mock the grunt.task instance.
+ */
+var GruntTaskMock = function GruntTaskMock() {
+  this._queue = [];
+};
+
+/**
+ * Enqueues a task to be run.
+ * @param {!String|!Array} task The task to enqueue.
+ */
+GruntTaskMock.prototype.run = function run(task) {
+  if (Array.isArray(task)) {
+    this._queue.push.apply(this._queue, task);
+  } else {
+    this._queue.push(task);
+  }
+};
+
+/**
+ * Assers that the task queue is in the expected state.
+ * @param {!Array.<!String>} queue The expected queue.
+ */
+GruntTaskMock.prototype.assertTaskQueue = function assertTaskQueue(queue) {
+  assert.deepEqual(this._queue, queue);
+};
+
+
+/**
  * @class GruntMock
  * Mocks a grunt instance to allow testing.
  */
@@ -85,6 +114,7 @@ var GruntMock = module.exports = function GruntMock() {
   this._tasks = {};
 
   this.config = (new GruntConfigMock()).createCallable();
+  this.task   = new GruntTaskMock();
 };
 
 
@@ -112,6 +142,11 @@ GruntMock.prototype.assertHasTask = function assertHasTask(name) {
   }
 };
 
+/**
+ * Runs a registered task with the given parameters.
+ * @param {!String} name The task to run.
+ * @returns {*} the return value of the task.
+ */
 GruntMock.prototype.testTask = function testTask(name/*, varargs */) {
   this.assertHasTask(name);
   return this._tasks[name].apply(

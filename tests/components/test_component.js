@@ -63,7 +63,7 @@ suite("Component", function() {
       };
       assert.throws(block, /Cannot parse malformed dependency 'a.b.c'/);
     });
-    
+
     test("check duplicates fails if a component has two targets", function() {
       var block = function() {
         var components = [{
@@ -77,7 +77,7 @@ suite("Component", function() {
       };
       assert.throws(block, /Ambiguous dependency for component 'a'/);
     });
-    
+
     test("check duplicates ignores the same target", function() {
       var components = [{
         name: "a",

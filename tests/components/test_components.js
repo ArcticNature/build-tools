@@ -274,4 +274,46 @@ suite("Components", function() {
       assert(this.components.has("found-component-name"));
     });
   });
+
+  suite("Plotting", function() {
+    test("empty graph", function() {
+      assert.equal(
+          this.components.plot("test"),
+          "digraph {\n}\n"
+      );
+    });
+
+    test("one component", function() {
+      this.components.add(new Component({
+        name: "a",
+        targets: { test: {} }
+      }));
+
+      assert.equal(
+          this.components.plot("test"),
+          "digraph {\n" +
+          "  a\n" +
+          "}\n"
+      );
+    });
+
+    test("one dependnecy", function() {
+      this.components.add(new Component({
+        name: "a",
+        targets: { test: {} }
+      }));
+      this.components.add(new Component({
+        name: "b",
+        targets: { test: { deps: ["a"] } }
+      }));
+
+      assert.equal(
+          this.components.plot("test"),
+          "digraph {\n" +
+          "  a\n" +
+          "  a -> b\n" +
+          "}\n"
+      );
+    });
+  });
 });
