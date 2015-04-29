@@ -28,7 +28,7 @@ suite("Components", function() {
     });
 
     test("fails if a component is already in the group", function() {
-      var component = new Component({ name: "a" });
+      var component = new Component({ grunt: {}, name: "a" });
       var components = this.components;
       var block = function() {
         components.add(component);
@@ -39,7 +39,7 @@ suite("Components", function() {
     });
 
     test("succeeds", function() {
-      var component = new Component({ name: "a" });
+      var component = new Component({ grunt: {}, name: "a" });
       this.components.add(component);
       assert(this.components.has("a"));
     });
@@ -56,7 +56,8 @@ suite("Components", function() {
     
     test("fails if dependent component is missing", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: { deps: ["b"] } }
       }));
 
@@ -69,7 +70,8 @@ suite("Components", function() {
 
     test("fails if target is missing", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: {} }
       }));
 
@@ -84,18 +86,21 @@ suite("Components", function() {
     test("fails on ambiguous target", function() {
       // Add nodes to the graph.
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: {
           test: {},
           debug: {}
         }
       }));
       this.components.add(new Component({
-        name: "b",
+        grunt: {},
+        name:  "b",
         targets: { test: { deps: ["debug.a"] } }
       }));
       this.components.add(new Component({
-        name: "c",
+        grunt: {},
+        name:  "c",
         targets: { test: { deps: ["a", "b"] } }
       }));
 
@@ -109,11 +114,13 @@ suite("Components", function() {
     test("simple 'b' depends on 'a' is detected", function() {
       // Add nodes to the graph.
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: {} }
       }));
       this.components.add(new Component({
-        name: "b",
+        grunt: {},
+        name:  "b",
         targets: { test: { deps: ["a"] } }
       }));
 
@@ -128,15 +135,18 @@ suite("Components", function() {
     test("shared dependency 'a' is only added once", function() {
       // Add nodes to the graph.
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: {} }
       }));
       this.components.add(new Component({
-        name: "b",
+        grunt: {},
+        name:  "b",
         targets: { test: { deps: ["a"] } }
       }));
       this.components.add(new Component({
-        name: "c",
+        grunt: {},
+        name:  "c",
         targets: { test: { deps: ["a", "b"] } }
       }));
 
@@ -150,31 +160,38 @@ suite("Components", function() {
 
     test("verify fails if a complex loop is detected", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: { deps: ["b"] } }
       }));
       this.components.add(new Component({
-        name: "b",
+        grunt: {},
+        name:  "b",
         targets: { test: { deps: ["c", "d", "g"] } }
       }));
       this.components.add(new Component({
-        name: "c",
+        grunt: {},
+        name:  "c",
         targets: { test: {} }
       }));
       this.components.add(new Component({
-        name: "d",
+        grunt: {},
+        name:  "d",
         targets: { test: {} }
       }));
       this.components.add(new Component({
-        name: "e",
+        grunt: {},
+        name:  "e",
         targets: { test: { deps: ["f"] } }
       }));
       this.components.add(new Component({
-        name: "f",
+        grunt: {},
+        name:  "f",
         targets: { test: { deps: ["b"] } }
       }));
       this.components.add(new Component({
-        name: "g",
+        grunt: {},
+        name:  "g",
         targets: { test: { deps: ["f"] } }
       }));
 
@@ -187,7 +204,8 @@ suite("Components", function() {
 
     test("verify fails if a component needs itself", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: { deps: ["a"] } }
       }));
 
@@ -200,7 +218,8 @@ suite("Components", function() {
 
     test("verify fails if a dependency is not defined", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: { deps: ["b"] } }
       }));
 
@@ -213,11 +232,13 @@ suite("Components", function() {
 
     test("verify fails if a dependency target is not defined", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: { deps: ["debug.b"] } }
       }));
       this.components.add(new Component({
-        name: "b",
+        grunt: {},
+        name:  "b",
         targets: { test: {} }
       }));
 
@@ -232,11 +253,13 @@ suite("Components", function() {
 
     test("verify fails if a simple loop is detected", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: { deps: ["b"] } }
       }));
       this.components.add(new Component({
-        name: "b",
+        grunt: {},
+        name:  "b",
         targets: { test: { deps: ["a"] } }
       }));
 
@@ -285,7 +308,8 @@ suite("Components", function() {
 
     test("one component", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: {} }
       }));
 
@@ -299,11 +323,13 @@ suite("Components", function() {
 
     test("one dependnecy", function() {
       this.components.add(new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: { test: {} }
       }));
       this.components.add(new Component({
-        name: "b",
+        grunt: {},
+        name:  "b",
         targets: { test: { deps: ["a"] } }
       }));
 

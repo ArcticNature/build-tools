@@ -9,7 +9,8 @@ var verify = require("../utils/verify");
  */
 var Component = module.exports = function Component(configuration) {
   // Verify configuration.
-  verify.notNullObject(configuration, "Missing component configuration");
+  verify.notNullObject(configuration, "Invalid component configuration");
+  verify.notNullObject(configuration.grunt, "Grunt instance not valid");
   verify.notEmptyString(configuration.name, "Missing component name");
   verify.notNullObjectIfDefined(
       configuration.targets,
@@ -17,7 +18,8 @@ var Component = module.exports = function Component(configuration) {
   );
 
   // Store it in the new instance.
-  this._name = configuration.name;
+  this._grunt = configuration.grunt;
+  this._name  = configuration.name;
   this._targets = {};
 
   // Process targets.
@@ -105,6 +107,7 @@ Component.prototype._process_targets = function _process_targets(config) {
     var target = config.targets[name];
 
     // Verify target structure.
+    verify.notNullObject(target, "Target definitions must be objects.");
     verify.optionalArray(
         target.deps,
         "If defined, the deps property of target '" + name +
@@ -145,9 +148,18 @@ Component.prototype.dependencies = function dependencies(name) {
 /**
  * Returns the path to run the clean task against
  * @param {!String} target The target to get the path for.
- * @returns {!String}
+ * @returns {!String|!Array.<!String>} Path or paths to clear.
  */
 Component.prototype.getCleanPath = function getCleanPath(target) {
+  throw new Error("Method not implemented");
+};
+
+/**
+ * Handles the execution of a target.
+ * Usually this involves configuring one or more grunt tasks and queueing them.
+ * @param {!String} target The target to handle.
+ */
+Component.prototype.handleTarget = function handleTarget(target) {
   throw new Error("Method not implemented");
 };
 

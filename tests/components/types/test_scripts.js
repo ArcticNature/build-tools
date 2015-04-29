@@ -13,6 +13,7 @@ suite("ScriptsComponent", function() {
       config.grunt = grunt;
       config.name  = "test";
       config.path  = "/test";
+      config["clear-path"] = config["clear-path"] || "/clear/path";
       return new ScriptsComponent(config);
     };
   });
@@ -79,5 +80,18 @@ suite("ScriptsComponent", function() {
     });
   });
 
-  //
+  suite("Script based shell tasks", function() {
+    test("target is mapped to simple command", function() {
+      var component = this.make({
+        scripts: { test_cmd: "<%= path %>/script" },
+        targets: { test: { tasks: "test_cmd" } }
+      });
+
+      component.handleTarget("test");
+      this.grunt.task.assertTaskQueue(["shell:test.test_cmd"]);
+      assert.deepEqual(this.grunt.config("shell.test\\.test_cmd"), {
+        command: "/test/script"
+      });
+    });
+  });
 });

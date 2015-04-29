@@ -10,19 +10,26 @@ suite("Component", function() {
       var block = function() {
         new Component();
       };
-      assert.throws(block, /Missing component configuration/);
+      assert.throws(block, /Invalid component configuration/);
     });
 
     test("fails if configuration is null", function() {
       var block = function() {
         new Component(null);
       };
-      assert.throws(block, /Missing component configuration/);
+      assert.throws(block, /Invalid component configuration/);
+    });
+
+    test("fails if grunt is not given", function() {
+      var block = function() {
+        new Component({ });
+      };
+      assert.throws(block, /Grunt instance not valid/);
     });
 
     test("fails if name is not given", function() {
       var block = function() {
-        new Component({});
+        new Component({ grunt: {} });
       };
       assert.throws(block, /Missing component name/);
     });
@@ -30,6 +37,7 @@ suite("Component", function() {
     test("fails if name is empty", function() {
       var block = function() {
         new Component({
+          grunt: {},
           name: ""
         });
       };
@@ -38,6 +46,7 @@ suite("Component", function() {
 
     test("passes instenceof checks", function() {
       var component = new Component({
+        grunt: {},
         name: "a"
       });
       assert(component instanceof Component);
@@ -103,14 +112,14 @@ suite("Component", function() {
   suite("Dependencies", function() {
     test("fails if the target does not exist", function() {
       var block = function() {
-        var component = new Component({ name: "a" });
+        var component = new Component({ grunt: {}, name: "a" });
         component.dependencies("test");
       };
       assert.throws(block, /Missing target 'test' for 'a'/);
     });
 
     test("target has the specified dependencies", function() {
-      var component = new Component({ name: "a", targets: {
+      var component = new Component({ name: "a", grunt: {}, targets: {
         test: { deps: ["a", "b", "c"] }
       } });
       assert.deepEqual(component.dependencies("test"), [
@@ -122,8 +131,9 @@ suite("Component", function() {
 
     test("target gets dependencies from component too", function() {
       var component = new Component({
-        name: "a",
-        deps: ["a", "debug.e", "debug.f"],
+        grunt: {},
+        name:  "a",
+        deps:  ["a", "debug.e", "debug.f"],
         targets: {
           test: { deps: ["a", "b", "c"] }
         }
@@ -140,13 +150,14 @@ suite("Component", function() {
 
   suite("Targets", function() {
     test("are not present if not specified", function() {
-      var component = new Component({ name: "a" });
+      var component = new Component({ grunt: {}, name: "a" });
       assert.deepEqual(component.targets(), []);
     });
 
     test("are added if specified in the configuration", function() {
       var component = new Component({
-        name: "a",
+        grunt: {},
+        name:  "a",
         targets: {
           release: {},
           test: {}
@@ -157,7 +168,7 @@ suite("Component", function() {
 
     test("fail to parse if deps is specified but is not an array", function() {
       var block = function() {
-        new Component({ name: "a", targets: {
+        new Component({ grunt: {}, name: "a", targets: {
           test: { deps: "abc" }
         } });
       };

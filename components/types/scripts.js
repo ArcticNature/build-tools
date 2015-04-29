@@ -17,11 +17,62 @@ var ScriptsComponent = module.exports = function ScriptsComponent(
   this._validate(configuration);
 
   // Store configuration.
-  this._grunt = configuration.grunt;
-  this._path  = configuration.path;
+  this._path = configuration.path;
   this._clear_path = configuration["clear-path"];
 };
 ScriptsComponent.prototype = Object.create(Component.prototype);
+
+/**
+ * Handles the execution of a script target.
+ * @param {!String} script The name of the script to handle.
+ * @param {!string} target The target being handled.
+ */
+ScriptsComponent.prototype._handleScript = function _handleScript(
+    script, target
+) {
+  var command = this._scripts[script];
+  this._grunt.config("shell." + target + "\\." + script, {
+    command: this._template(command, target)
+  });
+  this._grunt.task.run("shell:" + target + "." + script);
+};
+
+//@override
+ScriptsComponent.prototype._process_targets = function _process_targets(
+    config
+) {
+  Component.prototype._process_targets.call(this, config);
+  verify.optionalObject(
+      config.scripts,
+      "The scripts attribute must be an object, if specified."
+  );
+  verify.optionalObject(
+      config.tasks,
+      "The tasks attribute must be an object, if specified."
+  );
+
+  this._scripts = config.scripts;
+
+  // Validate and add target's tasks.
+  var _this   = this;
+  var specs   = config.targets;
+  var targets = Object.keys(this._targets);
+
+  targets.forEach(function(target) {
+    verify.notEmptyString(
+      specs[target].tasks,
+      "Scripts target must have one or more string tasks."
+    );
+    var config = _this._targets[target];
+    var tasks  = specs[target].tasks;
+
+    if (!(tasks in _this._scripts)) {
+      throw new Error("Undefined script " + tasks);
+    }
+
+    config.tasks = tasks;
+  });
+};
 
 /**
  * Expands a string (or array of strings) through grunt's template.
@@ -52,7 +103,6 @@ ScriptsComponent.prototype._template = function _template(template, target) {
  * @param {!Object} configuration The configuration to validate.
  */
 ScriptsComponent.prototype._validate = function _validate(configuration) {
-  verify.notNullObject(configuration.grunt, "Grunt instance not valid");
   verify.notEmptyString(configuration.path, "Component path not valid");
 
   // Clear-path is either array or array of strings.
@@ -64,6 +114,14 @@ ScriptsComponent.prototype._validate = function _validate(configuration) {
   } else {
     verify.notEmptyString(clear_path, "Component clear-path not valid");
   }
+};
+
+//@override
+ScriptsComponent.prototype.handleTarget = function handleTarget(target) {
+  verify.notEmptyString(target, "Target not valid");
+
+  var config = this._targets[target];
+  this._handleScript(config.tasks, target);
 };
 
 //@override

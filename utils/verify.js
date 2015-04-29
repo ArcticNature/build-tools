@@ -46,12 +46,23 @@ verify.notNullObjectIfDefined = function notNullObject(value, message) {
 };
 
 /**
- * Verifies that a value is undefined or is an array
+ * Verifies that a value is undefined or is an array.
  * @param {?Array}  value   The value to check.
  * @param {!String} message The failure message for the thrown exception.
  */
 verify.optionalArray = function optionalArray(value, message) {
   if (typeof value !== "undefined") {
     verify.array(value, message);
+  }
+};
+
+/**
+ * Verifies that a value is undefined or is a not null object.
+ * @param {?Object} value   The value to check.
+ * @param {!String} message The failure message for the thrown exception.
+ */
+verify.optionalObject = function optionalObject(value, message) {
+  if (typeof value !== "undefined") {
+    verify.notNullObject(value, message);
   }
 };
