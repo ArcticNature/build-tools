@@ -81,6 +81,24 @@ suite("ScriptsComponent", function() {
   });
 
   suite("Script based shell tasks", function() {
+    test("target is mapped to command with arguments", function() {
+      var component = this.make({
+        scripts: {
+          test_cmd: {
+            command: "<%= path %>/script",
+            arguments: ["a", "<%= target %>"]
+          }
+        },
+        targets: { test: { tasks: "test_cmd" } }
+      });
+
+      component.handleTarget("test");
+      this.grunt.task.assertTaskQueue(["shell:test.test_cmd"]);
+      assert.deepEqual(this.grunt.config("shell.test\\.test_cmd"), {
+        command: "/test/script a test"
+      });
+    });
+
     test("target is mapped to simple command", function() {
       var component = this.make({
         scripts: { test_cmd: "<%= path %>/script" },

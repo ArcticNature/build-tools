@@ -30,9 +30,22 @@ ScriptsComponent.prototype = Object.create(Component.prototype);
 ScriptsComponent.prototype._handleScript = function _handleScript(
     script, target
 ) {
-  var command = this._scripts[script];
+  var command = null;
+  var config  = this._scripts[script];
+
+  if (typeof config === "string") {
+    command = this._template(config, target);
+  } else {
+    var _this = this;
+    var args  = config.arguments || [];
+    args = args.map(function(arg) {
+      return _this._template(arg, target);
+    });
+    command = this._template(config.command, target) + " " + args.join(" ");
+  }
+
   this._grunt.config("shell." + target + "\\." + script, {
-    command: this._template(command, target)
+    command: command
   });
   this._grunt.task.run("shell:" + target + "." + script);
 };
