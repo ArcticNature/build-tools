@@ -18,6 +18,36 @@ suite("ScriptsComponent", function() {
     };
   });
 
+  suite("Clear path", function() {
+    test("constant array is returned unchanged", function() {
+      var component = this.make({
+        "clear-path": ["abc", "def"]
+      });
+      assert.deepEqual(component.getCleanPath("test"), ["abc", "def"]);
+    });
+
+    test("constant string is returned unchanged", function() {
+      var component = this.make({
+        "clear-path": "abc"
+      });
+      assert.strictEqual(component.getCleanPath("test"), "abc");
+    });
+
+    test("template array is processed", function() {
+      var component = this.make({
+        "clear-path": ["a<%= path %>b", "c<%= target %>d"]
+      });
+      assert.deepEqual(component.getCleanPath("debug"), ["a/testb", "cdebugd"]);
+    });
+
+    test("template string is processed", function() {
+      var component = this.make({
+        "clear-path": "<%= path %>"
+      });
+      assert.strictEqual(component.getCleanPath("test"), "/test");
+    });
+  });
+
   suite("Constructor", function() {
     test("fails if grunt is missing", function() {
       var block = function() {
@@ -50,33 +80,59 @@ suite("ScriptsComponent", function() {
     });
   });
 
-  suite("Clear path", function() {
-    test("constant array is returned unchanged", function() {
-      var component = this.make({
-        "clear-path": ["abc", "def"]
-      });
-      assert.deepEqual(component.getCleanPath("test"), ["abc", "def"]);
+  suite("Custom tasks in targets", function() {
+    test("detect if task is missing", function() {
+      var _this = this;
+      var block = function() {
+        _this.make({ targets: {
+            test: { tasks: "!test_cmd" }
+        } });
+      };
+      assert.throws(block, /Undefined task test_cmd/);
     });
 
-    test("constant string is returned unchanged", function() {
+    test("target is mapped to multitask with config", function() {
       var component = this.make({
-        "clear-path": "abc"
+        tasks: { test_cmd: {
+            name: "multitask",
+            config: { some: "option" }
+        } },
+        targets: { test: { tasks: "!test_cmd" } }
       });
-      assert.strictEqual(component.getCleanPath("test"), "abc");
+
+      component.handleTarget("test");
+      this.grunt.task.assertTaskQueue(["multitask:test.test_cmd"]);
+      assert.deepEqual(this.grunt.config("multitask.test\\.test_cmd"), {
+        some: "option"
+      });
     });
 
-    test("template array is processed", function() {
+    test("target is mapped to multitask without config", function() {
       var component = this.make({
-        "clear-path": ["a<%= path %>b", "c<%= target %>d"]
+        tasks: { test_cmd: { name: "multitask" } },
+        targets: { test: { tasks: "!test_cmd" } }
       });
-      assert.deepEqual(component.getCleanPath("debug"), ["a/testb", "cdebugd"]);
-    });
 
-    test("template string is processed", function() {
+      component.handleTarget("test");
+      this.grunt.task.assertTaskQueue(["multitask:test.test_cmd"]);
+      assert.deepEqual(this.grunt.config("multitask.test\\.test_cmd"), {});
+    });
+    
+    test("target is mapped to two multitasks", function() {
       var component = this.make({
-        "clear-path": "<%= path %>"
+        tasks: {
+          task1: { name: "multitask1" },
+          task2: { name: "multitask2" }
+        },
+        targets: { test: { tasks: ["!task1", "!task2"] } }
       });
-      assert.strictEqual(component.getCleanPath("test"), "/test");
+
+      component.handleTarget("test");
+      this.grunt.task.assertTaskQueue([
+        "multitask1:test.task1", "multitask2:test.task2"
+      ]);
+      assert.deepEqual(this.grunt.config("multitask1.test\\.task1"), {});
+      assert.deepEqual(this.grunt.config("multitask2.test\\.task2"), {});
     });
   });
 
