@@ -35,13 +35,20 @@ ScriptsComponent.prototype._handleScript = function _handleScript(
 
   if (typeof config === "string") {
     command = this._template(config, target);
-  } else {
+
+  } else if (typeof config === "object") {
     var _this = this;
     var args  = config.arguments || [];
     args = args.map(function(arg) {
       return _this._template(arg, target);
     });
     command = this._template(config.command, target) + " " + args.join(" ");
+
+  } else {
+    throw new Error(
+      "Invalid script '" + script + "' configuration for '" +
+      this._name + "'"
+    );
   }
 
   this._grunt.config("shell." + target + "\\." + script, {
@@ -72,18 +79,25 @@ ScriptsComponent.prototype._process_targets = function _process_targets(
   var targets = Object.keys(this._targets);
 
   targets.forEach(function(target) {
-    verify.notEmptyString(
-      specs[target].tasks,
-      "Scripts target must have one or more string tasks."
-    );
-    var config = _this._targets[target];
-    var tasks  = specs[target].tasks;
+    var error_message = "Scripts target must have one or more string tasks.";
+    var tasks = specs[target].tasks;
 
-    if (!(tasks in _this._scripts)) {
-      throw new Error("Undefined script " + tasks);
+    if (Array.isArray(tasks)) {
+      tasks.forEach(function (task) {
+        verify.notEmptyString(task, error_message);
+        if (!(task in _this._scripts)) {
+          throw new Error("Undefined script " + task);
+        }
+      });
+
+    } else {
+      verify.notEmptyString(tasks, error_message);
+      if (!(tasks in _this._scripts)) {
+        throw new Error("Undefined script " + tasks);
+      }
     }
 
-    config.tasks = tasks;
+    _this._targets[target].tasks = tasks;
   });
 };
 
@@ -133,8 +147,16 @@ ScriptsComponent.prototype._validate = function _validate(configuration) {
 ScriptsComponent.prototype.handleTarget = function handleTarget(target) {
   verify.notEmptyString(target, "Target not valid");
 
-  var config = this._targets[target];
-  this._handleScript(config.tasks, target);
+  var _this = this;
+  var tasks = this._targets[target].tasks;
+  if (Array.isArray(tasks)) {
+    tasks.forEach(function (task) {
+      _this._handleScript(task, target);
+    });
+
+  } else {
+    this._handleScript(tasks, target);
+  }
 };
 
 //@override

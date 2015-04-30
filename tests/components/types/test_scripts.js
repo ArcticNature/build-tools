@@ -99,6 +99,29 @@ suite("ScriptsComponent", function() {
       });
     });
 
+    test("target is mapped to multiple commands", function() {
+      var component = this.make({
+        scripts: {
+          test_cmd:  "<%= path %>/script",
+          other_cmd: "some command"
+        },
+        targets: { test: { tasks: ["test_cmd", "other_cmd"] } }
+      });
+
+      component.handleTarget("test");
+      this.grunt.task.assertTaskQueue([
+        "shell:test.test_cmd",
+        "shell:test.other_cmd"
+      ]);
+
+      assert.deepEqual(this.grunt.config("shell.test\\.test_cmd"), {
+        command: "/test/script"
+      });
+      assert.deepEqual(this.grunt.config("shell.test\\.other_cmd"), {
+        command: "some command"
+      });
+    });
+
     test("target is mapped to simple command", function() {
       var component = this.make({
         scripts: { test_cmd: "<%= path %>/script" },
