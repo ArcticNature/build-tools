@@ -106,6 +106,18 @@ GruntTaskMock.prototype.assertTaskQueue = function assertTaskQueue(queue) {
   assert.deepEqual(this._queue, queue);
 };
 
+/**
+ * @class GruntThisMock
+ * Mocks this context inside a grunt task.
+ * 
+ * @param {!String} name  The task running.
+ * @param {!Object} grunt The grunt instance.
+ */
+var GruntThisMock = function GruntThisMock(name, grunt) {
+  this.name = name;
+  this._grunt = grunt;
+};
+
 
 /**
  * @class GruntMock
@@ -116,6 +128,9 @@ var GruntMock = module.exports = function GruntMock() {
 
   this.config = (new GruntConfigMock()).createCallable();
   this.task   = new GruntTaskMock();
+
+  this.log = {};
+  this.log.verbose = new GruntVerboseLog();
 
   // Not everything needs mocking.
   this.template = grunt.template;
@@ -154,6 +169,16 @@ GruntMock.prototype.assertHasTask = function assertHasTask(name) {
 GruntMock.prototype.testTask = function testTask(name/*, varargs */) {
   this.assertHasTask(name);
   return this._tasks[name].apply(
-      this._insideTask, Array.prototype.slice.call(arguments, 1)
+      new GruntThisMock(name, this),
+      Array.prototype.slice.call(arguments, 1)
   );
 };
+
+
+/**
+ * @class GruntVerboseLog
+ * Mocks grunt.log.verbose.
+ */
+var GruntVerboseLog = function GruntVerboseLog() {};
+
+GruntVerboseLog.prototype.ok = function ok() {};

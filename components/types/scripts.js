@@ -80,10 +80,10 @@ ScriptsComponent.prototype._handleScript = function _handleScript(
     );
   }
 
-  this._grunt.config("shell." + target + "\\." + script, {
+  this._grunt.config("shell." + target + "\\." + this._name + "\\." + script, {
     command: command
   });
-  this._grunt.task.run("shell:" + target + "." + script);
+  this._grunt.task.run("shell:" + target + "." + this._name + "." + script);
 };
 
 /**
@@ -105,8 +105,13 @@ ScriptsComponent.prototype._handleTask = function _handleTask(task, target) {
 
   var task_config = this._expandValue(target, config.config) || {};
   var task_name   = config.name;
-  this._grunt.config(task_name + "." + target + "\\." + task, task_config);
-  this._grunt.task.run(task_name + ":" + target + "." + task);
+  this._grunt.config(
+      task_name + "." + target + "\\." + this._name + "\\." + task,
+      task_config
+  );
+  this._grunt.task.run(
+      task_name + ":" + target + "." + this._name + "." + task
+  );
 };
 
 /**

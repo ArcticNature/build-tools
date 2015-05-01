@@ -119,8 +119,8 @@ suite("ScriptsComponent", function() {
       });
 
       component.handleTarget("test");
-      this.grunt.task.assertTaskQueue(["multitask:test.test_cmd"]);
-      assert.deepEqual(this.grunt.config("multitask.test\\.test_cmd"), {
+      this.grunt.task.assertTaskQueue(["multitask:test.test.test_cmd"]);
+      assert.deepEqual(this.grunt.config("multitask.test\\.test\\.test_cmd"), {
         some: "option"
       });
     });
@@ -132,8 +132,10 @@ suite("ScriptsComponent", function() {
       });
 
       component.handleTarget("test");
-      this.grunt.task.assertTaskQueue(["multitask:test.test_cmd"]);
-      assert.deepEqual(this.grunt.config("multitask.test\\.test_cmd"), {});
+      this.grunt.task.assertTaskQueue(["multitask:test.test.test_cmd"]);
+      assert.deepEqual(
+          this.grunt.config("multitask.test\\.test\\.test_cmd"), {}
+      );
     });
     
     test("target is mapped to two multitasks", function() {
@@ -147,10 +149,10 @@ suite("ScriptsComponent", function() {
 
       component.handleTarget("test");
       this.grunt.task.assertTaskQueue([
-        "multitask1:test.task1", "multitask2:test.task2"
+        "multitask1:test.test.task1", "multitask2:test.test.task2"
       ]);
-      assert.deepEqual(this.grunt.config("multitask1.test\\.task1"), {});
-      assert.deepEqual(this.grunt.config("multitask2.test\\.task2"), {});
+      assert.deepEqual(this.grunt.config("multitask1.test\\.test\\.task1"), {});
+      assert.deepEqual(this.grunt.config("multitask2.test\\.test\\.task2"), {});
     });
   });
 
@@ -167,8 +169,8 @@ suite("ScriptsComponent", function() {
       });
 
       component.handleTarget("test");
-      this.grunt.task.assertTaskQueue(["shell:test.test_cmd"]);
-      assert.deepEqual(this.grunt.config("shell.test\\.test_cmd"), {
+      this.grunt.task.assertTaskQueue(["shell:test.test.test_cmd"]);
+      assert.deepEqual(this.grunt.config("shell.test\\.test\\.test_cmd"), {
         command: "/test/script a test"
       });
     });
@@ -184,14 +186,14 @@ suite("ScriptsComponent", function() {
 
       component.handleTarget("test");
       this.grunt.task.assertTaskQueue([
-        "shell:test.test_cmd",
-        "shell:test.other_cmd"
+        "shell:test.test.test_cmd",
+        "shell:test.test.other_cmd"
       ]);
 
-      assert.deepEqual(this.grunt.config("shell.test\\.test_cmd"), {
+      assert.deepEqual(this.grunt.config("shell.test\\.test\\.test_cmd"), {
         command: "/test/script"
       });
-      assert.deepEqual(this.grunt.config("shell.test\\.other_cmd"), {
+      assert.deepEqual(this.grunt.config("shell.test\\.test\\.other_cmd"), {
         command: "some command"
       });
     });
@@ -203,8 +205,8 @@ suite("ScriptsComponent", function() {
       });
 
       component.handleTarget("test");
-      this.grunt.task.assertTaskQueue(["shell:test.test_cmd"]);
-      assert.deepEqual(this.grunt.config("shell.test\\.test_cmd"), {
+      this.grunt.task.assertTaskQueue(["shell:test.test.test_cmd"]);
+      assert.deepEqual(this.grunt.config("shell.test\\.test\\.test_cmd"), {
         command: "/test/script"
       });
     });
