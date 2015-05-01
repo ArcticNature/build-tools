@@ -155,8 +155,14 @@ Component.prototype.getCleanPath = function getCleanPath(target) {
 };
 
 /**
- * Handles the execution of a target.
- * Usually this involves configuring one or more grunt tasks and queueing them.
+ * Handles the configuration and enqueuing of analysis tasks.
+ */
+Component.prototype.handleAnalysis = function handleAnalysis() {
+  throw new Error("Method not implemented");
+};
+
+/**
+ * Handles the configuration and enqueuing of a target.
  * @param {!String} target The target to handle.
  */
 Component.prototype.handleTarget = function handleTarget(target) {

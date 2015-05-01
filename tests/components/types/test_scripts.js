@@ -18,6 +18,41 @@ suite("ScriptsComponent", function() {
     };
   });
 
+  suite("Analysis tasks", function() {
+    test("based on one task", function() {
+      var component = this.make({
+        analysis: "!test_cmd",
+        tasks: { test_cmd: { name: "command" } }
+      });
+
+      component.handleAnalysis();
+      this.grunt.task.assertTaskQueue(["command:analysis.test.test_cmd"]);
+      assert.deepEqual(
+          this.grunt.config("command.analysis\\.test\\.test_cmd"), {}
+      );
+    });
+
+    test("based on list of tasks and scripts", function() {
+      var component = this.make({
+        analysis: ["test_cmd", "!test_cmd"],
+        tasks:    { test_cmd: { name: "command" } },
+        scripts:  { test_cmd: "command" }
+      });
+
+      component.handleAnalysis();
+      this.grunt.task.assertTaskQueue([
+        "shell:analysis.test.test_cmd",
+        "command:analysis.test.test_cmd"
+      ]);
+      assert.deepEqual(this.grunt.config("shell.analysis\\.test\\.test_cmd"), {
+        command: "command"
+      });
+      assert.deepEqual(
+          this.grunt.config("command.analysis\\.test\\.test_cmd"), {}
+      );
+    });
+  });
+
   suite("Clear path", function() {
     test("constant array is returned unchanged", function() {
       var component = this.make({

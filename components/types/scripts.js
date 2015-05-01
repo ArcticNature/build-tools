@@ -13,12 +13,17 @@ var verify = require("../../utils/verify");
 var ScriptsComponent = module.exports = function ScriptsComponent(
     configuration
 ) {
+  // These options required for target processing so before calling super.
+  this._scripts = configuration.scripts || {};
+  this._tasks   = configuration.tasks   || {};
+
   Component.call(this, configuration);
   this._validate(configuration);
 
   // Store configuration.
-  this._path = configuration.path;
+  this._analysis = configuration.analysis;
   this._clear_path = configuration["clear-path"];
+  this._path = configuration.path;
 };
 ScriptsComponent.prototype = Object.create(Component.prototype);
 
@@ -143,9 +148,6 @@ ScriptsComponent.prototype._process_targets = function _process_targets(
       "The tasks attribute must be an object, if specified."
   );
 
-  this._scripts = config.scripts || {};
-  this._tasks   = config.tasks   || {};
-
   // Validate and add target's tasks.
   var _this   = this;
   var specs   = config.targets;
@@ -228,6 +230,26 @@ _validateTaskOrScript(task_or_script) {
 
   } else if (!(task_or_script in this._scripts)) {
     throw new Error("Undefined script " + task_or_script);
+  }
+};
+
+//@override
+ScriptsComponent.prototype.handleAnalysis = function handleAnalysis() {
+  var message = (
+      "Scripts analysis attribute must be a valid string " +
+      "(or array of strings)."
+  );
+
+  if (Array.isArray(this._analysis)) {
+    var _this = this;
+    this._analysis.forEach(function(task_or_script) {
+      verify.notEmptyString(task_or_script, message);
+      _this._handleTaskOrScript(task_or_script, "analysis");
+    });
+
+  } else {
+    verify.notEmptyString(this._analysis, message);
+    this._handleTaskOrScript(this._analysis, "analysis");
   }
 };
 

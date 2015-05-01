@@ -1,6 +1,6 @@
 /**
  * Debug, Release and Test target grunt tasks.
- * Processes clear and clear:component requests.
+ * Processes debug|release|test and debug|release|test:component requests.
  * 
  * These tasks can be called in two ways:
  *   * debug|release|test           - Will run the target for all components.
@@ -30,7 +30,7 @@ module.exports = function(grunt) {
     components.forEach(function(component) {
       component.handleTarget(target);
       grunt.log.verbose.ok(
-          "Configured target '" + target + "' for component '" +
+          "Configured " + target + " target for component '" +
           component.name() + "'."
       );
     });
