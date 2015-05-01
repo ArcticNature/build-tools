@@ -81,6 +81,24 @@ suite("ScriptsComponent", function() {
   });
 
   suite("Custom tasks in targets", function() {
+    test("configuration object is processed for templates.", function() {
+      var component = this.make({});
+      var config = {
+        key: 123,
+        some: {
+          nested: [{ option: "<%= path %>" }]
+        }
+      };
+
+      var processed = component._expandValue("test", config);
+      assert.deepEqual(processed, {
+        key: 123,
+        some: {
+          nested: [{ option: "/test" }]
+        }
+      });
+    });
+
     test("detect if task is missing", function() {
       var _this = this;
       var block = function() {

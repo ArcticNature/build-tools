@@ -23,6 +23,35 @@ var ScriptsComponent = module.exports = function ScriptsComponent(
 ScriptsComponent.prototype = Object.create(Component.prototype);
 
 /**
+ * Expands strings as templates, returns values and recurse into objects
+ * and arrays.
+ * @param {!String} target The target to expand with.
+ * @param {*}       value  The value to expand.
+ * @returns {*} The processed value.
+ */
+ScriptsComponent.prototype._expandValue = function _expandValue(target, value) {
+  var _this = this;
+
+  if (Array.isArray(value)) {
+    return value.map(function(nested_value) {
+      return _this._expandValue(target, nested_value);
+    });
+
+  } else if (typeof value === "string") {
+    return this._template(value, target);
+
+  } else if (typeof value === "object" && value !== null) {
+    var processed = {};
+    Object.keys(value).forEach(function(key) {
+      processed[key] = _this._expandValue(target, value[key]);
+    });
+    return processed;
+
+  }
+  return value;
+};
+
+/**
  * Handles the execution of a script target.
  * @param {!String} script The name of the script to handle.
  * @param {!string} target The target being handled.
@@ -74,7 +103,7 @@ ScriptsComponent.prototype._handleTask = function _handleTask(task, target) {
       "' does not name a multitask to configure."
   );
 
-  var task_config = config.config || {};
+  var task_config = this._expandValue(target, config.config) || {};
   var task_name   = config.name;
   this._grunt.config(task_name + "." + target + "\\." + task, task_config);
   this._grunt.task.run(task_name + ":" + target + "." + task);

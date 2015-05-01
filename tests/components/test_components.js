@@ -46,6 +46,34 @@ suite("Components", function() {
   });
 
   suite("Dependencies navigation", function() {
+    test("all targets do not include duplicates", function() {
+      // Add nodes to the graph.
+      this.components.add(new Component({
+        grunt: {},
+        name:  "a",
+        targets: {
+          test: {},
+          debug: {}
+        }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "b",
+        targets: { test: { deps: ["debug.a"] } }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "c",
+        targets: { test: { deps: ["a", "b"] } }
+      }));
+
+      var components = this.components;
+      var block = function() {
+        components.resolve("c", "test");
+      };
+      assert.throws(block, /Ambiguous dependency for component 'a'/);
+    });
+
     test("fails if component is missing", function() {
       var components = this.components;
       var block = function() {
@@ -268,6 +296,97 @@ suite("Components", function() {
         components.verifyTarget("test");
       };
       assert.throws(block, /Detected mutual dependency between 'a' and 'b'/);
+    });
+  });
+
+  suite("Fetch all components", function() {
+    test("returned in resolved order", function() {
+      this.components.add(new Component({
+        grunt: {},
+        name:  "a",
+        targets: { test: { deps: ["b"] } }
+      }));
+
+      var components = this.components;
+      var block = function() {
+        components.all("test", {});
+      };
+
+      assert.throws(block);
+      assert(
+          !("__resolve_all_component__" in components._components),
+          "Stub component not removed."
+      );
+    });
+
+    test("only components with the requested target are considered", function() {
+      this.components.add(new Component({
+        grunt: {},
+        name:  "b",
+        targets: { test: {} }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "c",
+        targets: { debug: {} }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "a",
+        targets: { debug: { deps: ["b", "c"] } }
+      }));
+
+      var list = this.components.all("test", {});
+      list = list.map(function(component) {
+        return component.name();
+      });
+
+      assert.deepEqual(list, ["b"]);
+    });
+
+    test("returned in resolved order", function() {
+      this.components.add(new Component({
+        grunt: {},
+        name:  "b",
+        targets: { test: {} }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "a",
+        targets: { test: { deps: ["b"] } }
+      }));
+
+      var list = this.components.all("test", {});
+      list = list.map(function(component) {
+        return component.name();
+      });
+
+      assert.deepEqual(list, ["b", "a"]);
+    });
+
+    test("returned in resolved order or alphabetical", function() {
+      this.components.add(new Component({
+        grunt: {},
+        name:  "b",
+        targets: { test: {} }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "c",
+        targets: { test: {} }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "a",
+        targets: { test: { deps: ["c", "b"] } }
+      }));
+
+      var list = this.components.all("test", {});
+      list = list.map(function(component) {
+        return component.name();
+      });
+
+      assert.deepEqual(list, ["b", "c", "a"]);
     });
   });
 

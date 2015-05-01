@@ -1,5 +1,6 @@
 var Component = require("./component");
-var verify    = require("../utils/verify");
+var ResolveAllComponent = require("./types/resolve-all");
+var verify = require("../utils/verify");
 
 
 /**
@@ -89,6 +90,45 @@ Components.prototype.add = function add(component) {
 };
 
 /**
+ * Returns a list of all components in the 
+ * @param {!String} target The target to fetch all components for.
+ * @param {!Object} grunt  The grunt instance to use.
+ * @returns {!Array.<!String>} list of components in resolved order.
+ */
+Components.prototype.all = function all(target, grunt) {
+  // Filter out all names where test target is not defined.
+  var _this = this;
+  var names = Object.keys(this._components).sort();
+  names = names.filter(function(name) {
+    return _this._components[name].hasTarget(target);
+  });
+
+  // Create fake component that depends on all other components.
+  var stub = new ResolveAllComponent(grunt, names, target);
+
+  // Add it, call resolve on it and remove it.
+  var stub_name  = stub.name();
+  var components = null;
+  try {
+    this.add(stub);
+    components = this.resolve(stub_name, target);
+    delete this._components[stub_name];
+
+  } catch (ex) {
+    if (stub_name in this._components) {
+      delete this._components[stub_name];
+    }
+    throw ex;
+  }
+
+  // Pop it form the list of returned components.
+  components.pop();
+
+  // Return the resolved list.
+  return components;
+};
+
+/**
  * Returns a component from the collection.
  * @param {!String} component The component to get.
  * @returns {!Component} A Component instance.
@@ -169,6 +209,18 @@ Components.prototype.resolve = function resolve(
 
   // Recoursivly process dependencies with a breadth first search.
   var deps = this._components[name].dependencies(target);
+  deps.sort(function(left, right) {
+    var lname = left.name;
+    var rname = right.name;
+
+    if (lname < rname) {
+      return -1;
+    } else if (lname === rname) {
+      return 0;
+    }
+    return +1;
+  });
+
   deps.forEach(function(dep) {
     if (dep.name in processed_components) {
       if (dep.target !== processed_components[dep.name]) {
@@ -190,6 +242,36 @@ Components.prototype.resolve = function resolve(
   // Now add the current component.
   components.push(this._components[name]);
   return components;
+};
+
+/**
+ * @returns {!Array.<!String>} list of all targets across all components.
+ */
+Components.prototype.targets = function targets() {
+  var _this   = this;
+  var targets = {};
+  var components = this.list();
+
+  components.forEach(function(component) {
+    _this._components[component].targets().forEach(function(target) {
+      targets[target] = true;
+    });
+  });
+
+  return Object.keys(targets);
+};
+
+/**
+ * Verifies that no cyclic dependencies are present and that all required
+ * components and targets are configured.
+ */
+Components.prototype.verify = function verify() {
+  var _this = this;
+  var targets = this.targets();
+  
+  targets.forEach(function(target) {
+    _this.verifyTarget(target);
+  });
 };
 
 /**
