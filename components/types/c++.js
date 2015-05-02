@@ -1,6 +1,7 @@
 var path = require("path");
 
 var Component = require("../component");
+var array_utils = require("../../utils/array");
 var verify = require("../../utils/verify");
 
 
@@ -11,12 +12,128 @@ var verify = require("../../utils/verify");
  * @param {!Object} configuration The configuration of the component.
  */
 var CppComponent = module.exports = function CppComponent(configuration) {
+  this._verify(configuration);
+  this._exclude = configuration.exclude;
+
   Component.call(this, configuration);
-  verify.notEmptyString(configuration.path, "Missing component path");
 
   this._path = configuration.path;
 };
 CppComponent.prototype = Object.create(Component.prototype);
+
+/**
+ * Configures and enqueues the tasks to compile the core of the component.
+ * @param {!String} key    The base configuration key for generated tasks.
+ * @param {!String} name   The base task name for generated tasks.
+ * @param {!String} target The target to compile.
+ * @param {!Components} components Collection of components in the system.
+ */
+CppComponent.prototype._compileCore = function _compileCore(
+    key, name, target, components
+) {
+  var include = this._includes(components, target);
+  var sources = this._sources(target);
+
+  this._grunt.config("g++." + key + "\\.core", {
+    coverage: target === "test",
+    include:  include,
+    objects_path: path.join("out", "build", target),
+    src: sources
+  });
+  this._grunt.task.run("g++:" + name + ".core");
+};
+
+/**
+ * List include paths for the current component based on its dependencies.
+ * @param {!Components} components Collection of components in the system.
+ * @param {!String}     target     The target mode to compile for.
+ * @returns {!Array.<!String>} the list of include paths.
+ */
+CppComponent.prototype._includes = function _includes(components, target) {
+  var include = [];
+  var deps    = components.resolve(this._name, target);
+
+  deps.forEach(function(dep) {
+    if (dep instanceof CppComponent) {
+      include.push(path.join(dep._path, "include"));
+    }
+  });
+
+  return include;
+};
+
+//@override
+CppComponent.prototype._process_targets = function _process_targets(config) {
+  Component.prototype._process_targets.call(this, config);
+
+  var _this   = this;
+  var targets = Object.keys(this._targets);
+
+  targets.forEach(function(target_name) {
+    _this._verifyTarget(config.targets[target_name]);
+
+    var target  = config.targets[target_name];
+    var exclude = [];
+
+    if (config.exclude) {
+      exclude.push.apply(exclude, config.exclude);
+    }
+    if (target.exclude) {
+      exclude.push.apply(exclude, target.exclude);
+    }
+
+    _this._targets[target_name].exclude = array_utils.filterDuplicates(exclude);
+  });
+};
+
+/**
+ * Lists glob patterns for source files of the core task.
+ * @param {!String}     target     The target mode to compile for.
+ * @returns {!Array.<!String>} the list of source files.
+ */
+CppComponent.prototype._sources = function _sources(target) {
+  var sources = [path.join(this._path, "src", "**", "*.cpp")];
+
+  if (this._targets[target].exclude) {
+    this._targets[target].exclude.forEach(function(exclude) {
+      sources.push("!" + exclude);
+    });
+  }
+
+  return sources;
+};
+
+/**
+ * Verifies the configuration.
+ * @param {!Object} configuration The configuration to verify.
+ */
+CppComponent.prototype._verify = function _verify(configuration) {
+  var exclude_message = (
+      "The exclude attribute must be array of strings, if specified"
+  );
+
+  verify.notEmptyString(configuration.path, "Missing component path");
+  verify.optionalArray(configuration.exclude, exclude_message);
+
+  (configuration.exclude || []).forEach(function(exclude) {
+    verify.notEmptyString(exclude, exclude_message);
+  });
+};
+
+/**
+ * Verifies a target configuration.
+ * @param {!Object} target The target configuration to verify.
+ */
+CppComponent.prototype._verifyTarget = function _verifyTarget(target) {
+  var exclude_message = (
+      "The exclude attribute must be array of strings, if specified"
+  );
+
+  verify.optionalArray(target.exclude, exclude_message);
+  (target.exclude || []).forEach(function(exclude) {
+    verify.notEmptyString(exclude, exclude_message);
+  });
+};
 
 //@override
 CppComponent.prototype.getCleanPath = function getCleanPath(target) {
@@ -25,3 +142,16 @@ CppComponent.prototype.getCleanPath = function getCleanPath(target) {
     path.join("out", "dist",  target, this._path)
   ];
 };
+
+//Override
+CppComponent.prototype.handleTarget = function handleTarget(
+    target, components
+) {
+  var key  = target + "\\." + this._name;
+  var name = target + "." + this._name;
+
+  this._compileCore(key, name, target, components);
+};
+
+
+// Debug, Release, Test, Analysis

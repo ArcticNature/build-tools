@@ -28,7 +28,7 @@ module.exports = function(grunt) {
     }
 
     components.forEach(function(component) {
-      component.handleTarget(target);
+      component.handleTarget(target, register);
       grunt.log.verbose.ok(
           "Configured " + target + " target for component '" +
           component.name() + "'."

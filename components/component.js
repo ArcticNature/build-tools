@@ -164,8 +164,9 @@ Component.prototype.handleAnalysis = function handleAnalysis() {
 /**
  * Handles the configuration and enqueuing of a target.
  * @param {!String} target The target to handle.
+ * @param {!Components} components Collection of components in the system.
  */
-Component.prototype.handleTarget = function handleTarget(target) {
+Component.prototype.handleTarget = function handleTarget(target, components) {
   throw new Error("Method not implemented");
 };
 

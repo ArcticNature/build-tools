@@ -29,7 +29,7 @@ module.exports = function(grunt) {
     }
 
     components.forEach(function(component) {
-      component.handleTarget("test");
+      component.handleTarget("test", register);
       grunt.log.verbose.ok(
           "Configured test target for component '" + component.name() + "'."
       );
