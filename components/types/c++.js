@@ -17,9 +17,36 @@ var CppComponent = module.exports = function CppComponent(configuration) {
 
   Component.call(this, configuration);
 
-  this._path = configuration.path;
+  this._path  = configuration.path;
+  this._types = {
+    lib: this._compileLib
+  };
 };
 CppComponent.prototype = Object.create(Component.prototype);
+
+/**
+ * Configures and enqueues tasks based on the target type.
+ * @param {!String} key    The base configuration key for generated tasks.
+ * @param {!String} name   The base task name for generated tasks.
+ * @param {!String} target The target to compile.
+ * @param {!Components} components Collection of components in the system.
+ */
+CppComponent.prototype._compileByType = function _compileByType(
+    key, name, target, components
+) {
+  var type = this._targets[target].type;
+  if (!type) {
+    // No type set, skip this step.
+    return;
+  }
+
+  if (!(type in this._types)) {
+    throw new Error("Unrecognised target type '" + type + "'");
+  }
+
+  var handler = this._types[type];
+  handler.call(this, key, name, target, components);
+};
 
 /**
  * Configures and enqueues the tasks to compile the core of the component.
@@ -41,6 +68,25 @@ CppComponent.prototype._compileCore = function _compileCore(
     src: sources
   });
   this._grunt.task.run("g++:" + name + ".core");
+};
+
+/**
+ * Configures and enqueues tasks for static libraries.
+ * @param {!String} key    The base configuration key for generated tasks.
+ * @param {!String} name   The base task name for generated tasks.
+ * @param {!String} target The target to compile.
+ * @param {!Components} components Collection of components in the system.
+ */
+CppComponent.prototype._compileLib = function _compileLib(
+    key, name, target, components
+) {
+  this._grunt.config("ar." + key + "\\.lib", {
+    files: [{
+      dest: path.join("out", "dist", target, this._path, this._name + ".a"),
+      src:  path.join("out", "build", target, this._path, "**", "*.o")
+    }]
+  });
+  this._grunt.task.run("ar:" + name + ".lib");
 };
 
 /**
@@ -83,6 +129,7 @@ CppComponent.prototype._process_targets = function _process_targets(config) {
     }
 
     _this._targets[target_name].exclude = array_utils.filterDuplicates(exclude);
+    _this._targets[target_name].type    = target.type;
   });
 };
 
@@ -133,6 +180,10 @@ CppComponent.prototype._verifyTarget = function _verifyTarget(target) {
   (target.exclude || []).forEach(function(exclude) {
     verify.notEmptyString(exclude, exclude_message);
   });
+
+  if (typeof target.type !== "undefined") {
+    verify.notEmptyString(target.type, "Type must be a valid string");
+  }
 };
 
 //@override
@@ -151,6 +202,7 @@ CppComponent.prototype.handleTarget = function handleTarget(
   var name = target + "." + this._name;
 
   this._compileCore(key, name, target, components);
+  this._compileByType(key, name, target, components);
 };
 
 

@@ -10,6 +10,8 @@ var ScriptsComponent = require("../../../components/types/scripts");
 suite("CppComponent", function() {
   setup(function() {
     var grunt = this.grunt = new GruntMock();
+    this.components = new Components();
+
     this.make = function make(config) {
       config = Object.create(config || {});
       config.grunt = grunt;
@@ -28,10 +30,6 @@ suite("CppComponent", function() {
   });
 
   suite("Core tasks", function() {
-    setup(function() {
-      this.components = new Components();
-    });
-
     test("are created for debug", function() {
       var component = this.make({
         targets: { debug: {} }
@@ -113,6 +111,42 @@ suite("CppComponent", function() {
         include:  ["te/st/include"],
         objects_path: "out/build/debug",
         src: ["te/st/src/**/*.cpp", "!exclude1", "!exclude2"]
+      });
+    });
+  });
+
+  suite("Tasks by type", function() {
+    test("fails if type is not recognised", function() {
+      var components = this.components;
+      var component  = this.make({
+        targets: { debug: { type: "--not-valid--" } }
+      });
+
+      components.add(component);
+      var block = function() {
+        component.handleTarget("debug", components);
+      };
+
+      assert.throws(block, /Unrecognised target type '--not-valid--'/);
+    });
+
+    test("lib calls ar", function() {
+      var components = this.components;
+      var component  = this.make({
+        targets: { debug: { type: "lib" } }
+      });
+
+      components.add(component);
+      component.handleTarget("debug", components);
+
+      this.grunt.task.assertTaskQueue([
+        "g++:debug.test.core", "ar:debug.test.lib"
+      ]);
+      assert.deepEqual(this.grunt.config("ar.debug\\.test\\.lib"), {
+        files: [{
+          dest: "out/dist/debug/te/st/test.a",
+          src:  "out/build/debug/te/st/**/*.o"
+        }]
       });
     });
   });
