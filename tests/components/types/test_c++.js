@@ -1,10 +1,13 @@
 var assert = require("assert");
 var mocha  = require("mocha");
+var path   = require("path");
 
 var GruntMock    = require("../../grunt-mock");
 var Components   = require("../../../components/components");
 var CppComponent = require("../../../components/types/c++");
 var ScriptsComponent = require("../../../components/types/scripts");
+
+var GCOVR_PATH = path.resolve("build-tools/gcovr");
 
 
 suite("CppComponent", function() {
@@ -27,6 +30,62 @@ suite("CppComponent", function() {
       "out/build/debug/te/st",
       "out/dist/debug/te/st"
     ]);
+  });
+
+  suite("Analysis tasks", function() {
+    setup(function() {
+      var component = this.make({ targets: { test: {} } });
+      this.components.add(component);
+      component.handleAnalysis(this.components);
+    });
+
+    test("linter configuration", function() {
+      assert.deepEqual(this.grunt.config("cpplint.analysis\\.test"), {
+        options: {
+          root: "te/st/include",
+          filter: [
+            "-runtime/indentation_namespace"
+          ]
+        },
+        src: ["te/st/include/**/*.h", "te/st/src/**/*.cpp"]
+      });
+    });
+
+    test("static analysis configuration", function() {
+      assert.deepEqual(this.grunt.config("cppcheck.analysis\\.test"), {
+        exclude: ["3rd-parties", "te/st/tests"],
+        include: ["te/st/include"],
+        save_to: "out/reports/te/st/cppcheck.xml",
+        src: [ "te/st/include/**/*.h", "te/st/src/**/*.cpp"]
+      });
+    });
+
+    test("tasks queue", function() {
+      this.grunt.task.assertTaskQueue([
+        "cpplint:analysis.test",
+        "cppcheck:analysis.test",
+        "shell:analysis.test",
+        "gcovr:analysis.test"
+      ]);
+    });
+
+    test("tests configuration", function() {
+      assert.deepEqual(this.grunt.config("shell.analysis\\.test"), {
+        command: (
+          "out/dist/test/te/st/run-tests --gtest_output='xml:" +
+          "out/reports/te/st/test-results.xml'"
+        )
+      });
+    });
+
+    test("tests coverage configuration", function() {
+      assert.deepEqual(this.grunt.config("gcovr.analysis\\.test"), {
+        exclude: ".*(3rd-parties|tests).*",
+        gcovr:   GCOVR_PATH,
+        objects: "out/build/test/te/st/src",
+        save_to: "out/reports/te/st/coverage.xml"
+      });
+    });
   });
 
   suite("Core tasks", function() {

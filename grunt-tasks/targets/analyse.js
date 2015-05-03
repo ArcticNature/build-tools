@@ -36,7 +36,7 @@ module.exports = function(grunt) {
       );
 
       if (analyse_all) {
-        instance.handleAnalysis();
+        instance.handleAnalysis(register);
         grunt.log.verbose.ok(
           "Configured analysis for component '" + instance.name() + "'."
         );
@@ -46,7 +46,7 @@ module.exports = function(grunt) {
     if (!analyse_all) {
       var component = components.pop();
       var instance  = component.instance;
-      instance.handleAnalysis();
+      instance.handleAnalysis(register);
       grunt.log.verbose.ok(
         "Configured analysis for component '" + instance.name() + "'."
       );

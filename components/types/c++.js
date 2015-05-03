@@ -4,6 +4,8 @@ var Component = require("../component");
 var array_utils = require("../../utils/array");
 var verify = require("../../utils/verify");
 
+var GCOVR_PATH = path.resolve("build-tools/gcovr");
+
 
 /**
  * @class CppComponent
@@ -314,10 +316,69 @@ CppComponent.prototype._verifyTarget = function _verifyTarget(target) {
 
 //@override
 CppComponent.prototype.getCleanPath = function getCleanPath(target) {
-  return [
+  var paths = [
     path.join("out", "build", target, this._path),
     path.join("out", "dist",  target, this._path)
   ];
+  
+  if (target === "analysis") {
+    paths.push(path.join("out", "reports", this._path));
+  }
+
+  return paths;
+};
+
+//Override
+Component.prototype.handleAnalysis = function handleAnalysis(components) {
+  var key  = "analysis\\." + this._name;
+  var name = "analysis." + this._name;
+
+  // Run linter.
+  this._grunt.config("cpplint." + key, {
+    options: {
+      root: path.normalize(path.join(this._path, "include")),
+      filter: [
+        "-runtime/indentation_namespace"
+      ]
+    },
+    src: [
+      path.join(this._path, "include", "**", "*.h"),
+      path.join(this._path, "src", "**", "*.cpp")
+    ]
+  });
+  this._grunt.task.run("cpplint:" + name);
+
+  // Run static analysis.
+  var include = this._includes(components, "test");
+  this._grunt.config("cppcheck." + key, {
+    exclude: ["3rd-parties", path.join(this._path, "tests")],
+    include: include,
+    save_to: path.join("out", "reports", this._path, "cppcheck.xml"),
+    src: [
+      path.join(this._path, "include", "**", "*.h"),
+      path.join(this._path, "src", "**", "*.cpp")
+    ]
+  });
+  this._grunt.task.run("cppcheck:" + name);
+
+  // Run tests.
+  this._grunt.config("shell." + key, {
+    command: (
+      path.join("out", "dist", "test", this._path, "run-tests") +
+      " --gtest_output='xml:" +
+      path.join("out", "reports", this._path, "test-results.xml") + "'"
+    )
+  });
+  this._grunt.task.run("shell:" + name);
+
+  // Run coverage.
+  this._grunt.config("gcovr." + key, {
+    exclude: ".*(3rd-parties|tests).*",
+    gcovr:   GCOVR_PATH,
+    objects: path.join("out", "build", "test", this._path, "src"),
+    save_to: path.join("out", "reports", this._path, "coverage.xml")
+  });
+  this._grunt.task.run("gcovr:" + name);
 };
 
 //Override
@@ -335,5 +396,3 @@ CppComponent.prototype.handleTarget = function handleTarget(
     this._compileBin(key, name, target, components, true);
   }
 };
-
-// Analysis

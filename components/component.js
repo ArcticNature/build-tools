@@ -156,8 +156,9 @@ Component.prototype.getCleanPath = function getCleanPath(target) {
 
 /**
  * Handles the configuration and enqueuing of analysis tasks.
+ * @param {!Components} components Collection of components in the system.
  */
-Component.prototype.handleAnalysis = function handleAnalysis() {
+Component.prototype.handleAnalysis = function handleAnalysis(components) {
   throw new Error("Method not implemented");
 };
 
