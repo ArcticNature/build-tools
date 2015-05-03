@@ -18,7 +18,7 @@ module.exports = function(grunt) {
     // Load the components collection.
     grunt.config.requires("get-components");
     var register = grunt.config.get("get-components")();
-    var target   = this.name.substring(4);
+    var target   = this.name;
 
     var components = null;
     if (component) {
@@ -37,7 +37,7 @@ module.exports = function(grunt) {
     });
   };
 
-  grunt.registerTask("new-debug",   "Runs tasks for debug mode.",   run_task);
-  grunt.registerTask("new-release", "Runs tasks for release mode.", run_task);
-  grunt.registerTask("new-test",    "Runs tasks for test mode.",    run_task);
+  grunt.registerTask("debug",   "Runs tasks for debug mode.",   run_task);
+  grunt.registerTask("release", "Runs tasks for release mode.", run_task);
+  grunt.registerTask("test",    "Runs tasks for test mode.",    run_task);
 };

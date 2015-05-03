@@ -167,7 +167,7 @@ Components.prototype.list = function list() {
 Components.prototype.plot = function plot(target) {
   var _this = this;
   var components = this.list();
-  var graph = "digraph {\n";
+  var graph = "digraph " + target + " {\n";
 
   components.forEach(function(name) {
     var component = _this.get(name);
@@ -182,7 +182,11 @@ Components.prototype.plot = function plot(target) {
     deps.forEach(function(dep) {
       graph += dep.instance.name() + "\" -> \"";
     });
-    graph += name + "\"\n";
+
+    var colour = Math.floor(Math.random() * 16777215).toString(16);
+    graph += name + "\"";
+    graph += " [color = \"#" + colour + "\"]";
+    graph += "\n";
   });
 
   return graph + "}\n";
