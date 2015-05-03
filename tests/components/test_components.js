@@ -435,7 +435,7 @@ suite("Components", function() {
       assert.equal(
           this.components.plot("test"),
           "digraph {\n" +
-          "  a\n" +
+          "  \"a\"\n" +
           "}\n"
       );
     });
@@ -455,8 +455,8 @@ suite("Components", function() {
       assert.equal(
           this.components.plot("test"),
           "digraph {\n" +
-          "  a\n" +
-          "  a -> b\n" +
+          "  \"a\"\n" +
+          "  \"a\" -> \"b\"\n" +
           "}\n"
       );
     });

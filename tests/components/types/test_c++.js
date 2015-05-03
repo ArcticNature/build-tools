@@ -3,6 +3,7 @@ var mocha  = require("mocha");
 var path   = require("path");
 
 var GruntMock    = require("../../grunt-mock");
+var Component    = require("../../../components/component");
 var Components   = require("../../../components/components");
 var CppComponent = require("../../../components/types/c++");
 var ScriptsComponent = require("../../../components/types/scripts");
@@ -129,7 +130,7 @@ suite("CppComponent", function() {
       });
     });
 
-    test("include dependencies headers but only for c++ deps", function() {
+    test("include dependencies headers but only for c++ and scripts deps", function() {
       this.components.add(this.make({
         name: "a",
         path: "a",
@@ -142,9 +143,15 @@ suite("CppComponent", function() {
         "clear-path": "c",
         targets: { debug: { tasks: [] } }
       }));
+      this.components.add(new Component({
+        grunt: this.grunt,
+        name:  "c",
+        "clear-path": "c",
+        targets: { debug: { tasks: [] } }
+      }));
 
       var test = this.make({
-        targets: { debug: { deps: ["a", "b"] } }
+        targets: { debug: { deps: ["a", "b", "c"] } }
       });
       this.components.add(test);
       test.handleTarget("debug", this.components);
@@ -153,7 +160,7 @@ suite("CppComponent", function() {
       assert.deepEqual(this.grunt.config("g++.debug\\.test\\.core"), {
         coverage: false,
         debug:    true,
-        include:  ["a/include", "te/st/include"],
+        include:  ["a/include", "b/include", "te/st/include"],
         objects_path: "out/build/debug",
         src: ["te/st/src/**/*.cpp"]
       });
@@ -312,11 +319,12 @@ suite("CppComponent", function() {
         ]
       });
       assert.deepEqual(this.grunt.config("link++.test\\.test\\.gtest"), {
-        libs: ["pthread"],
+        libs: ["pthread", "gcov"],
         files: [{
           dest: "out/dist/test/te/st/run-tests",
           src:  [
             "out/build/test/te/st/**/*.o",
+            "!out/build/test/te/st/**/main.o",
             "out/build/gtest/**/*.o"
           ]
         }]

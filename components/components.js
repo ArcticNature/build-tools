@@ -171,13 +171,18 @@ Components.prototype.plot = function plot(target) {
 
   components.forEach(function(name) {
     var component = _this.get(name);
-    var deps = component.dependencies(target);
+    if (!component.hasTarget(target)) {
+      return;
+    }
 
-    graph += "  ";
+    var deps = _this.resolve(name, target);
+    deps.pop();
+    graph += "  \"";
+
     deps.forEach(function(dep) {
-      graph += dep.name + " -> ";
+      graph += dep.instance.name() + "\" -> \"";
     });
-    graph += name + "\n";
+    graph += name + "\"\n";
   });
 
   return graph + "}\n";

@@ -23,7 +23,7 @@ module.exports = function(grunt_module) {
     var components = grunt.config.get("get-components")();
     var graph = components.plot(target);
 
-    grunt.file.write("out/deps.dot", graph);
+    grunt.file.write("out/deps/" + target + ".dot", graph);
     if (grunt.option("no-write")) {
       return;
     }
@@ -36,8 +36,8 @@ module.exports = function(grunt_module) {
       cmd:  "dot",
       args: [
         "-T" + format,
-        "-o", "out/deps." + format,
-        "out/deps.dot"
+        "-o", "out/deps/" + target + "." + format,
+        "out/deps/" + target + ".dot"
       ]
     });
 

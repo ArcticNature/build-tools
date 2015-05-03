@@ -1,6 +1,8 @@
 var path = require("path");
 
 var Component = require("../component");
+var ScriptsComponent = require("./scripts");
+
 var array_utils = require("../../utils/array");
 var verify = require("../../utils/verify");
 
@@ -92,9 +94,14 @@ CppComponent.prototype._compileBin = function _compileBin(
 
   if (link_gtest) {
     bin_name = "run-tests";
-    libraries.push("pthread");
-    objects.push(path.join("out", "build", "gtest", "**", "*.o"));
+    libraries.push("pthread", "gcov");
     task_ext = "gtest";
+
+    // Exclude main.o from tests to avoid link error.
+    objects.push(
+        "!" + path.join("out", "build", target, this._path, "**", "main.o"),
+        path.join("out", "build", "gtest", "**", "*.o")
+    );
   }
 
   objects.push.apply(objects, this._staticLibraries(components, target));
@@ -182,11 +189,14 @@ CppComponent.prototype._includes = function _includes(components, target) {
 
   deps.forEach(function(dep) {
     dep = dep.instance;
-    if (dep instanceof CppComponent) {
+    if (dep instanceof CppComponent || dep instanceof ScriptsComponent) {
       include.push(path.join(dep._path, "include"));
     }
   });
 
+  if (this._targets[target].include) {
+    include.push.apply(include, this._targets[target].include);
+  }
   return include;
 };
 
@@ -202,6 +212,7 @@ CppComponent.prototype._process_targets = function _process_targets(config) {
 
     var target  = config.targets[target_name];
     var exclude = [];
+    var include = [];
     var libs    = [];
 
     if (config.exclude) {
@@ -209,6 +220,13 @@ CppComponent.prototype._process_targets = function _process_targets(config) {
     }
     if (target.exclude) {
       exclude.push.apply(exclude, target.exclude);
+    }
+
+    if (config.include) {
+      include.push.apply(include, config.include);
+    }
+    if (target.include) {
+      include.push.apply(include, target.include);
     }
 
     if (config.libs) {
@@ -219,6 +237,7 @@ CppComponent.prototype._process_targets = function _process_targets(config) {
     }
 
     _this._targets[target_name].exclude = array_utils.filterDuplicates(exclude);
+    _this._targets[target_name].include = array_utils.filterDuplicates(include);
     _this._targets[target_name].libs = array_utils.filterDuplicates(libs);
     _this._targets[target_name].type = target.type;
   });
@@ -267,6 +286,7 @@ CppComponent.prototype._staticLibraries = function _staticLibraries(
     }
   });
 
+  libs.reverse();
   return libs;
 };
 
@@ -295,15 +315,22 @@ CppComponent.prototype._verifyTarget = function _verifyTarget(target) {
   var exclude_message = (
       "The exclude attribute must be array of strings, if specified"
   );
+  var include_message = (
+      "The include attribute must be array of strings, if specified"
+  );
   var libs_message = (
       "The libs attribute must be array of strings, if specified"
   );
 
   verify.optionalArray(target.exclude, exclude_message);
+  verify.optionalArray(target.include, include_message);
   verify.optionalArray(target.libs,    libs_message);
 
   (target.exclude || []).forEach(function(exclude) {
     verify.notEmptyString(exclude, exclude_message);
+  });
+  (target.include || []).forEach(function(include) {
+    verify.notEmptyString(include, include_message);
   });
   (target.libs || []).forEach(function(lib) {
     verify.notEmptyString(lib, libs_message);
@@ -347,6 +374,11 @@ Component.prototype.handleAnalysis = function handleAnalysis(components) {
     ]
   });
   this._grunt.task.run("cpplint:" + name);
+
+  // Stop here if test target does not exist.
+  if (!this.hasTarget("test")) {
+    return;
+  }
 
   // Run static analysis.
   var include = this._includes(components, "test");
