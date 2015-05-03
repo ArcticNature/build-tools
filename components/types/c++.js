@@ -19,6 +19,7 @@ var CppComponent = module.exports = function CppComponent(configuration) {
 
   this._path  = configuration.path;
   this._types = {
+    bin: this._compileBin,
     lib: this._compileLib
   };
 };
@@ -63,11 +64,61 @@ CppComponent.prototype._compileCore = function _compileCore(
 
   this._grunt.config("g++." + key + "\\.core", {
     coverage: target === "test",
+    debug:    target !== "release",
     include:  include,
     objects_path: path.join("out", "build", target),
     src: sources
   });
   this._grunt.task.run("g++:" + name + ".core");
+};
+
+/**
+ * Configures and enqueues tasks for binaries.
+ * @param {!String} key    The base configuration key for generated tasks.
+ * @param {!String} name   The base task name for generated tasks.
+ * @param {!String} target The target to compile.
+ * @param {Boolean} link_gtest True if linking tests.
+ * @param {!Components} components Collection of components in the system.
+ */
+CppComponent.prototype._compileBin = function _compileBin(
+    key, name, target, components, link_gtest
+) {
+  var bin_name  = this._name;
+  var libraries = this._dynamicLibraries(components, target);
+  var objects   = [path.join("out", "build", target, this._path, "**", "*.o")];
+  var task_ext  = "bin";
+
+  if (link_gtest) {
+    bin_name = "run-tests";
+    libraries.push("pthread");
+    objects.push(path.join("out", "build", "gtest", "**", "*.o"));
+    task_ext = "gtest";
+  }
+
+  objects.push.apply(objects, this._staticLibraries(components, target));
+
+  this._grunt.config("link++." + key + "\\." + task_ext, {
+    libs:  libraries,
+    files: [{
+      dest: path.join("out", "dist", target, this._path, bin_name),
+      src:  objects
+    }]
+  });
+  this._grunt.task.run("link++:" + name + "." + task_ext);
+};
+
+CppComponent.prototype._compileGTest = function _compileGTest(key, name) {
+  this._grunt.config("g++." + key + "\\.gtest", {
+    coverage: true,
+    debug:    true,
+    include:  ["3rd-parties/include", "3rd-parties/sources/gtest"],
+    objects_path: path.join("out", "build", "gtest"),
+    src: [
+      "3rd-parties/sources/gtest/src/gtest-all.cc",
+      "3rd-parties/sources/gtest/src/gtest_main.cc"
+    ]
+  });
+  this._grunt.task.run("g++:" + name + ".gtest");
 };
 
 /**
@@ -90,6 +141,34 @@ CppComponent.prototype._compileLib = function _compileLib(
 };
 
 /**
+ * Lists the dynamic libraries needed for this component.
+ * @param {!Components} components Collection of components in the system.
+ * @param {!String}     target     The target mode to compile for.
+ * @returns {!Array.<!String>} the list of dynamic libraries.
+ */
+CppComponent.prototype._dynamicLibraries = function _dynamicLibraries(
+    components, target
+) {
+  var libs = [];
+  var deps = components.resolve(this._name, target);
+
+  deps.forEach(function(dep) {
+    var dep_target = dep.target;
+    dep = dep.instance;
+    var should_check = (
+        dep instanceof CppComponent &&
+        dep._targets[dep_target].type === "lib"
+    );
+    if (should_check) {
+      libs.push.apply(libs, dep._targets[dep_target].libs || []);
+    }
+  });
+
+  libs.push.apply(libs, this._targets[target].libs || []);
+  return libs;
+};
+
+/**
  * List include paths for the current component based on its dependencies.
  * @param {!Components} components Collection of components in the system.
  * @param {!String}     target     The target mode to compile for.
@@ -100,6 +179,7 @@ CppComponent.prototype._includes = function _includes(components, target) {
   var deps    = components.resolve(this._name, target);
 
   deps.forEach(function(dep) {
+    dep = dep.instance;
     if (dep instanceof CppComponent) {
       include.push(path.join(dep._path, "include"));
     }
@@ -120,6 +200,7 @@ CppComponent.prototype._process_targets = function _process_targets(config) {
 
     var target  = config.targets[target_name];
     var exclude = [];
+    var libs    = [];
 
     if (config.exclude) {
       exclude.push.apply(exclude, config.exclude);
@@ -128,14 +209,22 @@ CppComponent.prototype._process_targets = function _process_targets(config) {
       exclude.push.apply(exclude, target.exclude);
     }
 
+    if (config.libs) {
+      libs.push.apply(libs, config.libs);
+    }
+    if (target.libs) {
+      libs.push.apply(libs, target.libs);
+    }
+
     _this._targets[target_name].exclude = array_utils.filterDuplicates(exclude);
-    _this._targets[target_name].type    = target.type;
+    _this._targets[target_name].libs = array_utils.filterDuplicates(libs);
+    _this._targets[target_name].type = target.type;
   });
 };
 
 /**
  * Lists glob patterns for source files of the core task.
- * @param {!String}     target     The target mode to compile for.
+ * @param {!String} target The target mode to compile for.
  * @returns {!Array.<!String>} the list of source files.
  */
 CppComponent.prototype._sources = function _sources(target) {
@@ -148,6 +237,35 @@ CppComponent.prototype._sources = function _sources(target) {
   }
 
   return sources;
+};
+
+/**
+ * Lists the static libraries needed for this component.
+ * @param {!Components} components Collection of components in the system.
+ * @param {!String}     target     The target mode to compile for.
+ * @returns {!Array.<!String>} the list of static library paths.
+ */
+CppComponent.prototype._staticLibraries = function _staticLibraries(
+    components, target
+) {
+  var libs = [];
+  var deps = components.resolve(this._name, target);
+
+  deps.forEach(function(dep) {
+    var dep_target = dep.target;
+    dep = dep.instance;
+    var should_check = (
+        dep instanceof CppComponent &&
+        dep._targets[dep_target].type === "lib"
+    );
+    if (should_check) {
+      libs.push(path.join(
+          "out", "dist", dep_target, dep._path, dep.name() + ".a"
+      ));
+    }
+  });
+
+  return libs;
 };
 
 /**
@@ -175,10 +293,18 @@ CppComponent.prototype._verifyTarget = function _verifyTarget(target) {
   var exclude_message = (
       "The exclude attribute must be array of strings, if specified"
   );
+  var libs_message = (
+      "The libs attribute must be array of strings, if specified"
+  );
 
   verify.optionalArray(target.exclude, exclude_message);
+  verify.optionalArray(target.libs,    libs_message);
+
   (target.exclude || []).forEach(function(exclude) {
     verify.notEmptyString(exclude, exclude_message);
+  });
+  (target.libs || []).forEach(function(lib) {
+    verify.notEmptyString(lib, libs_message);
   });
 
   if (typeof target.type !== "undefined") {
@@ -203,7 +329,11 @@ CppComponent.prototype.handleTarget = function handleTarget(
 
   this._compileCore(key, name, target, components);
   this._compileByType(key, name, target, components);
+
+  if (target === "test") {
+    this._compileGTest(key, name);
+    this._compileBin(key, name, target, components, true);
+  }
 };
 
-
-// Debug, Release, Test, Analysis
+// Analysis

@@ -29,24 +29,26 @@ module.exports = function(grunt) {
     }
 
     components.forEach(function(component) {
-      component.handleTarget("test", register);
+      var instance = component.instance;
+      instance.handleTarget(component.target, register);
       grunt.log.verbose.ok(
-          "Configured test target for component '" + component.name() + "'."
+          "Configured test target for component '" + instance.name() + "'."
       );
 
       if (analyse_all) {
-        component.handleAnalysis();
+        instance.handleAnalysis();
         grunt.log.verbose.ok(
-          "Configured analysis for component '" + component.name() + "'."
+          "Configured analysis for component '" + instance.name() + "'."
         );
       }
     });
 
     if (!analyse_all) {
       var component = components.pop();
-      component.handleAnalysis();
+      var instance  = component.instance;
+      instance.handleAnalysis();
       grunt.log.verbose.ok(
-        "Configured analysis for component '" + component.name() + "'."
+        "Configured analysis for component '" + instance.name() + "'."
       );
     }
   };

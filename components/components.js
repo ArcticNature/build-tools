@@ -188,7 +188,7 @@ Components.prototype.plot = function plot(target) {
  * @param {!String} name   The component to resolve.
  * @param {!String} target The target to resolve.
  * @param {?Object} processed_components Set of visited components.
- * @returns {!Array.<Component>}
+ * @returns {!Array.<!Object>} The dependency information 
  */
 Components.prototype.resolve = function resolve(
     name, target, processed_components
@@ -240,7 +240,7 @@ Components.prototype.resolve = function resolve(
   });
 
   // Now add the current component.
-  components.push(this._components[name]);
+  components.push({ instance: this._components[name], target: target });
   return components;
 };
 
@@ -268,7 +268,7 @@ Components.prototype.targets = function targets() {
 Components.prototype.verify = function verify() {
   var _this = this;
   var targets = this.targets();
-  
+
   targets.forEach(function(target) {
     _this.verifyTarget(target);
   });
@@ -287,6 +287,8 @@ Components.prototype.verifyTarget = function verifyTarget(target) {
   var known_components = {};
 
   component_names.forEach(function(component_name) {
-    _this._findComponentDeps(component_name, target, known_components);
+    if (_this._components[component_name].hasTarget(target)) {
+      _this._findComponentDeps(component_name, target, known_components);
+    }
   });
 };

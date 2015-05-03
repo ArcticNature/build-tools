@@ -40,6 +40,7 @@ suite("CppComponent", function() {
       this.grunt.task.assertTaskQueue(["g++:debug.test.core"]);
       assert.deepEqual(this.grunt.config("g++.debug\\.test\\.core"), {
         coverage: false,
+        debug:    true,
         include:  ["te/st/include"],
         objects_path: "out/build/debug",
         src: ["te/st/src/**/*.cpp"]
@@ -62,6 +63,7 @@ suite("CppComponent", function() {
       this.grunt.task.assertTaskQueue(["g++:debug.test.core"]);
       assert.deepEqual(this.grunt.config("g++.debug\\.test\\.core"), {
         coverage: false,
+        debug:    true,
         include:  ["a/include", "te/st/include"],
         objects_path: "out/build/debug",
         src: ["te/st/src/**/*.cpp"]
@@ -91,6 +93,7 @@ suite("CppComponent", function() {
       this.grunt.task.assertTaskQueue(["g++:debug.test.core"]);
       assert.deepEqual(this.grunt.config("g++.debug\\.test\\.core"), {
         coverage: false,
+        debug:    true,
         include:  ["a/include", "te/st/include"],
         objects_path: "out/build/debug",
         src: ["te/st/src/**/*.cpp"]
@@ -108,6 +111,7 @@ suite("CppComponent", function() {
       this.grunt.task.assertTaskQueue(["g++:debug.test.core"]);
       assert.deepEqual(this.grunt.config("g++.debug\\.test\\.core"), {
         coverage: false,
+        debug:    true,
         include:  ["te/st/include"],
         objects_path: "out/build/debug",
         src: ["te/st/src/**/*.cpp", "!exclude1", "!exclude2"]
@@ -116,6 +120,81 @@ suite("CppComponent", function() {
   });
 
   suite("Tasks by type", function() {
+    test("bin calls link++", function() {
+      var components = this.components;
+      var component  = this.make({
+        targets: { debug: { type: "bin" } }
+      });
+
+      components.add(component);
+      component.handleTarget("debug", components);
+
+      this.grunt.task.assertTaskQueue([
+        "g++:debug.test.core", "link++:debug.test.bin"
+      ]);
+      assert.deepEqual(this.grunt.config("link++.debug\\.test\\.bin"), {
+        libs: [],
+        files: [{
+          dest: "out/dist/debug/te/st/test",
+          src:  ["out/build/debug/te/st/**/*.o"]
+        }]
+      });
+    });
+
+    test("bin finds static libraries from deps", function() {
+      var components = this.components;
+      var component  = this.make({
+        targets: { debug: { type: "bin", deps: ["test.a"] } }
+      });
+
+      components.add(this.make({
+        name: "a",
+        targets: { test: { type: "lib" } }
+      }));
+
+      components.add(component);
+      component.handleTarget("debug", components);
+
+      this.grunt.task.assertTaskQueue([
+        "g++:debug.test.core", "link++:debug.test.bin"
+      ]);
+      assert.deepEqual(this.grunt.config("link++.debug\\.test\\.bin"), {
+        libs: [],
+        files: [{
+          dest: "out/dist/debug/te/st/test",
+          src:  ["out/build/debug/te/st/**/*.o", "out/dist/test/te/st/a.a"]
+        }]
+      });
+    });
+
+    test("bin includes libraries from deps", function() {
+      var components = this.components;
+      var component  = this.make({
+        libs: ["lua"],
+        targets: { debug: { type: "bin", deps: ["test.a"] } }
+      });
+
+      components.add(this.make({
+        name: "a",
+        libs: ["gflags"],
+        targets: { test: { type: "lib" } }
+      }));
+
+      components.add(component);
+      component.handleTarget("debug", components);
+
+      this.grunt.task.assertTaskQueue([
+        "g++:debug.test.core", "link++:debug.test.bin"
+      ]);
+      assert.deepEqual(this.grunt.config("link++.debug\\.test\\.bin"), {
+        libs: ["gflags", "lua"],
+        files: [{
+          dest: "out/dist/debug/te/st/test",
+          src:  ["out/build/debug/te/st/**/*.o", "out/dist/test/te/st/a.a"]
+        }]
+      });
+    });
+
     test("fails if type is not recognised", function() {
       var components = this.components;
       var component  = this.make({
@@ -146,6 +225,41 @@ suite("CppComponent", function() {
         files: [{
           dest: "out/dist/debug/te/st/test.a",
           src:  "out/build/debug/te/st/**/*.o"
+        }]
+      });
+    });
+    
+    test("test compiles gtest", function() {
+      var components = this.components;
+      var component  = this.make({
+        targets: { test: { type: "bin" } }
+      });
+
+      components.add(component);
+      component.handleTarget("test", components);
+
+      this.grunt.task.assertTaskQueue([
+        "g++:test.test.core", "link++:test.test.bin",
+        "g++:test.test.gtest", "link++:test.test.gtest"
+      ]);
+      assert.deepEqual(this.grunt.config("g++.test\\.test\\.gtest"), {
+        coverage: true,
+        debug:    true,
+        include:  ["3rd-parties/include", "3rd-parties/sources/gtest"],
+        objects_path: "out/build/gtest",
+        src: [
+          "3rd-parties/sources/gtest/src/gtest-all.cc",
+          "3rd-parties/sources/gtest/src/gtest_main.cc"
+        ]
+      });
+      assert.deepEqual(this.grunt.config("link++.test\\.test\\.gtest"), {
+        libs: ["pthread"],
+        files: [{
+          dest: "out/dist/test/te/st/run-tests",
+          src:  [
+            "out/build/test/te/st/**/*.o",
+            "out/build/gtest/**/*.o"
+          ]
         }]
       });
     });

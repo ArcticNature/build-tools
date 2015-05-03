@@ -28,10 +28,11 @@ module.exports = function(grunt) {
     }
 
     components.forEach(function(component) {
-      component.handleTarget(target, register);
+      var instance = component.instance;
+      instance.handleTarget(target, register);
       grunt.log.verbose.ok(
           "Configured " + target + " target for component '" +
-          component.name() + "'."
+          instance.name() + "'."
       );
     });
   };

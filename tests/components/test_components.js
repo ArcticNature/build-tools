@@ -154,7 +154,7 @@ suite("Components", function() {
 
       var resolved = this.components.resolve("b", "test");
       resolved = resolved.map(function(component) {
-        return component.name();
+        return component.instance.name();
       });
 
       assert.deepEqual(resolved, ["a", "b"]);
@@ -180,7 +180,7 @@ suite("Components", function() {
 
       var resolved = this.components.resolve("c", "test");
       resolved = resolved.map(function(component) {
-        return component.name();
+        return component.instance.name();
       });
 
       assert.deepEqual(resolved, ["a", "b", "c"]);
@@ -338,7 +338,7 @@ suite("Components", function() {
 
       var list = this.components.all("test", {});
       list = list.map(function(component) {
-        return component.name();
+        return component.instance.name();
       });
 
       assert.deepEqual(list, ["b"]);
@@ -358,7 +358,7 @@ suite("Components", function() {
 
       var list = this.components.all("test", {});
       list = list.map(function(component) {
-        return component.name();
+        return component.instance.name();
       });
 
       assert.deepEqual(list, ["b", "a"]);
@@ -383,7 +383,7 @@ suite("Components", function() {
 
       var list = this.components.all("test", {});
       list = list.map(function(component) {
-        return component.name();
+        return component.instance.name();
       });
 
       assert.deepEqual(list, ["b", "c", "a"]);
