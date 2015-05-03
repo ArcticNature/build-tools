@@ -5,7 +5,7 @@ var Components = require("../../../components/components");
 var ScriptsComponent = require("../../../components/types/scripts");
 
 
-gruntSuite("Clear grunt task", "targets/main", function() {
+gruntSuite("Main grunt task", "targets/main", function() {
   setup(function() {
     var components = new Components();
     this.setComponents(components);
@@ -33,14 +33,14 @@ gruntSuite("Clear grunt task", "targets/main", function() {
   });
 
   test("dependencies are schedules too", function() {
-    this.grunt.testTask("new-test");
+    this.grunt.testTask("test");
     this.grunt.task.assertTaskQueue(
         ["shell:test.a.demo", "shell:test.b.demo"]
     );
   });
 
   test("target is processed", function() {
-    this.grunt.testTask("new-test", "a");
+    this.grunt.testTask("test", "a");
     this.grunt.task.assertTaskQueue(["shell:test.a.demo"]);
   });
 });

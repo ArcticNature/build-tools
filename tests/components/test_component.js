@@ -6,6 +6,21 @@ var Component = require("../../components/component");
 
 suite("Component", function() {
   suite("Constructor", function() {
+    test("fails if colours is not a string", function() {
+      var block = function() {
+        new Component({
+          grunt:  {},
+          name:   "a",
+          path:   "a",
+          colour: 123
+        });
+      };
+      assert.throws(
+          block,
+          /If defined, the colour property must be an hex colour prefixed by an #./
+      );
+    });
+
     test("fails if configuration is not given", function() {
       var block = function() {
         new Component();

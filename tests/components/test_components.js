@@ -421,7 +421,7 @@ suite("Components", function() {
     test("empty graph", function() {
       assert.equal(
           this.components.plot("test"),
-          "digraph {\n}\n"
+          "digraph test {\n}\n"
       );
     });
 
@@ -429,13 +429,14 @@ suite("Components", function() {
       this.components.add(new Component({
         grunt: {},
         name:  "a",
+        colour:  "#abcdef",
         targets: { test: {} }
       }));
 
       assert.equal(
           this.components.plot("test"),
-          "digraph {\n" +
-          "  \"a\"\n" +
+          "digraph test {\n" +
+          "  \"a\" [color = \"#abcdef\"]\n" +
           "}\n"
       );
     });
@@ -444,19 +445,21 @@ suite("Components", function() {
       this.components.add(new Component({
         grunt: {},
         name:  "a",
+        colour:  "#abcdef",
         targets: { test: {} }
       }));
       this.components.add(new Component({
         grunt: {},
         name:  "b",
+        colour:  "#fedcba",
         targets: { test: { deps: ["a"] } }
       }));
 
       assert.equal(
           this.components.plot("test"),
-          "digraph {\n" +
-          "  \"a\"\n" +
-          "  \"a\" -> \"b\"\n" +
+          "digraph test {\n" +
+          "  \"a\" [color = \"#abcdef\"]\n" +
+          "  \"a\" -> \"b\" [color = \"#fedcba\"]\n" +
           "}\n"
       );
     });

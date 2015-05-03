@@ -1,4 +1,5 @@
 var verify = module.exports = {};
+var HEX_COLOUR = /#[a-fA-F0-9]{6}/;
 
 
 /**
@@ -53,6 +54,20 @@ verify.notNullObjectIfDefined = function notNullObject(value, message) {
 verify.optionalArray = function optionalArray(value, message) {
   if (typeof value !== "undefined") {
     verify.array(value, message);
+  }
+};
+
+/**
+ * Verifies that a value is undefined or is an hax colour string.
+ * @param {?Object} value   The value to check.
+ * @param {!String} message The failure message for the thrown exception.
+ */
+verify.optionalColour = function optionalColour(value, message) {
+  if (typeof value !== "undefined") {
+    verify.notEmptyString(value, message);
+    if (!HEX_COLOUR.test(value)) {
+      throw new Error(value);
+    }
   }
 };
 

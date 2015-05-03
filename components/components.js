@@ -183,9 +183,9 @@ Components.prototype.plot = function plot(target) {
       graph += dep.instance.name() + "\" -> \"";
     });
 
-    var colour = Math.floor(Math.random() * 16777215).toString(16);
+    var colour = component.colour();
     graph += name + "\"";
-    graph += " [color = \"#" + colour + "\"]";
+    graph += " [color = \"" + colour + "\"]";
     graph += "\n";
   });
 

@@ -5,7 +5,7 @@ var Components = require("../../../components/components");
 var ScriptsComponent = require("../../../components/types/scripts");
 
 
-gruntSuite("Clear grunt task", "targets/analyse", function() {
+gruntSuite("Analyse grunt task", "targets/analyse", function() {
   setup(function() {
     var components = new Components();
     this.setComponents(components);

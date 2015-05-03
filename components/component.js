@@ -16,10 +16,15 @@ var Component = module.exports = function Component(configuration) {
       configuration.targets,
       "If defined, the target property must be an object."
   );
+  verify.optionalColour(
+      configuration.colour,
+      "If defined, the colour property must be an hex colour prefixed by an #."
+  );
 
   // Store it in the new instance.
-  this._grunt = configuration.grunt;
-  this._name  = configuration.name;
+  this._colour = configuration.colour;
+  this._grunt  = configuration.grunt;
+  this._name   = configuration.name;
   this._targets = {};
 
   // Process targets.
@@ -128,6 +133,16 @@ Component.prototype._process_targets = function _process_targets(config) {
       deps: deps
     };
   }
+};
+
+/**
+ * @returns {!String} The colour of the component.
+ */
+Component.prototype.colour = function colour() {
+  if (this._colour) {
+    return this._colour;
+  }
+  return "#" + Math.floor(Math.random() * 16777215).toString(16);
 };
 
 /**
