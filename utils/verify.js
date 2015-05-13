@@ -81,3 +81,16 @@ verify.optionalObject = function optionalObject(value, message) {
     verify.notNullObject(value, message);
   }
 };
+
+/**
+ * Verifies that a value is undefiend or a non empty strings.
+ * @param {!String} value   The value to check.
+ * @param {!String} message The failure message for the thrown exception.
+ */
+verify.optionalNotEmptyString = function optionalNotEmptyString(
+    value, message
+) {
+  if (typeof value !== "undefined") {
+    verify.notEmptyString(value, message);
+  }
+};

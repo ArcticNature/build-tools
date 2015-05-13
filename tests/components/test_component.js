@@ -163,6 +163,42 @@ suite("Component", function() {
     });
   });
 
+  suite("Module types", function() {
+    setup(function() {
+      this.make = function make(type) {
+        return new Component({
+          grunt: {},
+          name:  "a",
+          path:  "a",
+          "module-type": type
+        });
+      };
+    });
+
+    test("core is always enabled", function() {
+      var component = this.make("core");
+      component.disable();
+      assert(component.enabled());
+    });
+
+    test("core-extension is always enabled", function() {
+      var component = this.make("core-extention");
+      component.disable();
+      assert(component.enabled());
+    });
+
+    test("extension defaults to enabled", function() {
+      var component = this.make("extention");
+      assert(component.enabled());
+    });
+
+    test("extension can be disabled", function() {
+      var component = this.make("extention");
+      component.disable();
+      assert(!component.enabled());
+    });
+  });
+
   suite("Targets", function() {
     test("are not present if not specified", function() {
       var component = new Component({ grunt: {}, name: "a" });

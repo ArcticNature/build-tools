@@ -234,6 +234,11 @@ _validateTaskOrScript(task_or_script) {
 };
 
 //@override
+ScriptsComponent.prototype.getCleanPath = function getCleanPath(target) {
+  return this._template(this._clear_path, target);
+};
+
+//@override
 ScriptsComponent.prototype.handleAnalysis = function handleAnalysis() {
   var message = (
       "Scripts analysis attribute must be a valid string " +
@@ -267,9 +272,4 @@ ScriptsComponent.prototype.handleTarget = function handleTarget(target) {
   } else {
     this._handleTaskOrScript(tasks, target);
   }
-};
-
-//@override
-ScriptsComponent.prototype.getCleanPath = function getCleanPath(target) {
-  return this._template(this._clear_path, target);
 };

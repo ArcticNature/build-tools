@@ -90,7 +90,7 @@ Components.prototype.add = function add(component) {
 };
 
 /**
- * Returns a list of all components in the 
+ * Returns a list of all components in the collection.
  * @param {!String} target The target to fetch all components for.
  * @param {!Object} grunt  The grunt instance to use.
  * @returns {!Array.<!String>} list of components in resolved order.

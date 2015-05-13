@@ -6,6 +6,17 @@ var verify = require("../utils/verify");
  * Represents a component to be built.
  * 
  * @param {!Object} configuration The configuration of the component.
+ *  @property {!Object} grunt Instance of grunt to use in the component.
+ *  @property {!String} name  The name of the component.
+ *  @property {?String} colour  The colour of the component.
+ * 
+ *  @property {?Object} targets Target definition object.
+ *    @property {?Array.<String>} deps List of project dependencies.
+ * 
+ *  @property {?String} module-type Type of component being defined:
+ *    * core: module is always enabled and has no init function [default].
+ *    * core-extention: module is always enabled and has an init function.
+ *    * extension: module has an init function and can be disabled.
  */
 var Component = module.exports = function Component(configuration) {
   // Verify configuration.
@@ -20,11 +31,17 @@ var Component = module.exports = function Component(configuration) {
       configuration.colour,
       "If defined, the colour property must be an hex colour prefixed by an #."
   );
+  verify.optionalNotEmptyString(
+      configuration["module-type"],
+      "If defined, the module-type property must be a string."
+  );
 
   // Store it in the new instance.
   this._colour = configuration.colour;
   this._grunt  = configuration.grunt;
   this._name   = configuration.name;
+  this._module_type = configuration["module-type"] || "core";
+  this._enabled = true;
   this._targets = {};
 
   // Process targets.
@@ -158,6 +175,28 @@ Component.prototype.dependencies = function dependencies(name) {
 
   var target = this._targets[name];
   return target.deps;
+};
+
+/**
+ * Disables an optional component.
+ * Calls to this method have no effect if the component cannot be diasabled.
+ * @returns {!Boolean} true if the component was disabled by this call.
+ */
+Component.prototype.disable = function disable() {
+  var enabled = this._enabled;
+  this._enabled = false;
+  return enabled;
+};
+
+/**
+ * @returns {!Boolean} true if the component is currently enabled.
+ */
+Component.prototype.enabled = function enabled() {
+  return (
+      this._module_type === "core" ||
+      this._module_type === "core-extention" ||
+      this._enabled
+  );
 };
 
 /**
