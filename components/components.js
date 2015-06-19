@@ -33,13 +33,23 @@ Components.prototype._findComponentDeps = function _findComponentDeps(
   // Find immediate dependencies.
   var deps = component.dependencies(target);
   deps.forEach(function(dep) {
-    // Check if dependency exists.
+    // Check if dependency exists ...
     if (!_this.has(dep.name)) {
       throw new Error(
           "Component '" + component_name + "' needs missing dependency '"
           + dep.name + "'"
       );
     }
+
+    // ... and is enabled ...
+    if (!_this._components[dep.name].enabled()) {
+      throw new Error(
+          "Component '" + component_name + "' depends on disabled " +
+          "component '" + dep.name + "'"
+      );
+    }
+
+    // ... and has the required target.
     if (!_this._components[dep.name].hasTarget(dep.target)) {
       throw new Error(
           "Component '" + component_name + "' needs missing target '" +
@@ -96,11 +106,15 @@ Components.prototype.add = function add(component) {
  * @returns {!Array.<!String>} list of components in resolved order.
  */
 Components.prototype.all = function all(target, grunt) {
-  // Filter out all names where test target is not defined.
   var _this = this;
   var names = Object.keys(this._components).sort();
+
+  // Filter out all names where the target is not defined.
   names = names.filter(function(name) {
-    return _this._components[name].hasTarget(target);
+    return (
+        _this._components[name].hasTarget(target) &&
+        _this._components[name].enabled()
+    );
   });
 
   // Create fake component that depends on all other components.
@@ -208,7 +222,7 @@ Components.prototype.resolve = function resolve(
       processed_components, "'processed_components' should be a set"
   );
 
-  if (!this.has(name)) {
+  if (!this.has(name) || !this.get(name).enabled()) {
     throw new Error("Undefined dependent component '" + name + "'");
   }
 

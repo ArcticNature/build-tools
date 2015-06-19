@@ -15,7 +15,7 @@ module.exports = function(grunt) {
   var run_task = function run_task(component) {
     // Load the components collection.
     grunt.config.requires("get-components");
-    var register = grunt.config.get("get-components")();
+    var register = grunt.config.get("get-components")("test");
 
     var analyse_all = true;
     var components  = null;

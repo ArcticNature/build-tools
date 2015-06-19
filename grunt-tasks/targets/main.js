@@ -17,8 +17,8 @@ module.exports = function(grunt) {
   var run_task = function run_task(component) {
     // Load the components collection.
     grunt.config.requires("get-components");
-    var register = grunt.config.get("get-components")();
     var target   = this.name;
+    var register = grunt.config.get("get-components")(target);
 
     var components = null;
     if (component) {

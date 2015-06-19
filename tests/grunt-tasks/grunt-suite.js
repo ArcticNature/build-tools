@@ -1,7 +1,8 @@
 /**
  * Extends Mocha TDD ui with the gruntSuite method for testing Grunt tasks.
  */
-var mocha = module.exports = require("mocha");
+var assert = require("assert");
+var mocha  = module.exports = require("mocha");
 var GruntMock = require("../grunt-mock");
 
 
@@ -14,7 +15,11 @@ global.gruntSuite = function gruntSuite(name, path, callback) {
 
       var _this = this;
       this.setComponents = function setComponents(components) {
-        _this.grunt.config.set("get-components", function() {
+        _this.grunt.config.set("get-components", function(target) {
+          assert(
+            typeof target === "string" && target.length,
+            "Invalid target specified to get-components method."
+          );
           return components;
         });
       };

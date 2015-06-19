@@ -20,7 +20,7 @@ module.exports = function(grunt_module) {
     var grunt = grunt_module.getGrunt();
     grunt.config.requires("get-components");
 
-    var components = grunt.config.get("get-components")();
+    var components = grunt.config.get("get-components")(target);
     var graph = components.plot(target);
 
     grunt.file.write("out/deps/" + target + ".dot", graph);

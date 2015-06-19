@@ -4,6 +4,8 @@ var mocha  = require("mocha");
 var Component = require("../../components/component");
 var Components = require("../../components/components");
 
+var GruntMock = require("../grunt-mock");
+
 
 suite("Components", function() {
   setup(function() {
@@ -296,6 +298,70 @@ suite("Components", function() {
         components.verifyTarget("test");
       };
       assert.throws(block, /Detected mutual dependency between 'a' and 'b'/);
+    });
+  });
+
+  suite("Disabled components", function() {
+    setup(function() {
+      var components = this.components;
+      var grunt = this.grunt = new GruntMock();
+
+      var add_component = function (name, deps) {;
+        components.add(new Component({
+          name:  name,
+          grunt: grunt,
+          deps:  deps,
+          targets: { test: {} },
+          "module-type": "extention"
+        }));
+      };
+
+      add_component("a");
+      add_component("b");
+      add_component("c");
+      this.components.get("b").disable();
+    });
+
+    test("are not returned by all", function() {
+      var listed = this.components.all("test", this.grunt);
+      var names  = listed.map(function(component) {
+        return component.instance.name();
+      });
+      assert.deepEqual(names, ["a", "c"]);
+    });
+
+    test("are not considered for dependencies", function() {
+      var components = this.components;
+      var grunt = this.grunt;
+
+      components.add(new Component({
+        name:  "d",
+        grunt: grunt,
+        deps:  ["b"],
+        targets: { test: {} },
+        "module-type": "extention"
+      }));
+
+      assert.throws(function() {
+        components.all("test", grunt);
+      }, /Undefined dependent component 'b'/);
+    });
+
+    test("verify fails", function() {
+      var components = this.components;
+      var grunt = this.grunt;
+
+      components.add(new Component({
+        name:  "d",
+        grunt: grunt,
+        deps:  ["b"],
+        targets: { test: {} },
+        "module-type": "extention"
+      }));
+
+      assert.throws(function() {
+        components.verify();
+      }, / Component 'd' depends on disabled component 'b'/);
     });
   });
 

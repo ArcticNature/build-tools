@@ -79,6 +79,49 @@ GruntConfigMock.prototype.smartAccess = function smartAccess(name, value) {
 
 
 /**
+ * @class GruntFileMock
+ * Mocks grunt.file.
+ */
+var GruntFileMock = function GruntFileMock() {
+  this._files = {};
+};
+
+GruntFileMock.prototype.expand = function expand() {
+  return [];
+};
+
+GruntFileMock.prototype.exists = function exists(path) {
+  return path in this._files;
+};
+
+GruntFileMock.prototype.read = function read(file) {
+  if (file in this._files) {
+    return this._files[file];
+  }
+  assert.fail("in", "not in", "Unepxected read of file " + file);
+};
+
+/**
+ * Configures the files read by grunt.file.read.
+ * @param {!Object} files A map from file name to content.
+ */
+GruntFileMock.prototype.set_files = function set_files(files) {
+  this._files = files;
+};
+
+
+/**
+ * @class GruntLog
+ * Mocks grunt.log.
+ */
+var GruntLog = function GruntLog() {
+  this.verbose = new GruntVerboseLog();
+};
+GruntLog.prototype.ok = function ok() {};
+GruntLog.prototype.write = function write() {};
+
+
+/**
  * @class GruntTaskMock
  * Mock the grunt.task instance.
  */
@@ -127,10 +170,9 @@ var GruntMock = module.exports = function GruntMock() {
   this._tasks = {};
 
   this.config = (new GruntConfigMock()).createCallable();
+  this.file   = new GruntFileMock();
+  this.log    = new GruntLog();
   this.task   = new GruntTaskMock();
-
-  this.log = {};
-  this.log.verbose = new GruntVerboseLog();
 
   // Not everything needs mocking.
   this.template = grunt.template;
@@ -180,5 +222,5 @@ GruntMock.prototype.testTask = function testTask(name/*, varargs */) {
  * Mocks grunt.log.verbose.
  */
 var GruntVerboseLog = function GruntVerboseLog() {};
-
+GruntVerboseLog.prototype.error = function error() {};
 GruntVerboseLog.prototype.ok = function ok() {};

@@ -6,10 +6,7 @@ module.exports = function(grunt) {
 
     // Load the components collection.
     grunt.config.requires("get-components");
-    var components = grunt.config("get-components")();
-
-    // Load enabled/disabled components.
-    // Ignore unkown components in that list.
+    var components = grunt.config("get-components")(target);
 
     // List all components.
     var content = "";
@@ -23,7 +20,7 @@ module.exports = function(grunt) {
     if (grunt.option("no-write")) {
       grunt.log.writeln(content);
     }
-    grunt.file.write("build-tools/com-config/" + target, content);
+    grunt.file.write("build-tools/components-config/" + target, content);
   };
 
   grunt.registerTask(

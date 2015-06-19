@@ -11,7 +11,7 @@ gruntSuite("Clear grunt task", "targets/clear", function() {
     this.setComponents(components);
 
     components.add(new CppComponent({
-      grunt: {},
+      grunt: this.grunt,
       name:  "a",
       path:  "a/b/c",
       targets: {
@@ -20,7 +20,7 @@ gruntSuite("Clear grunt task", "targets/clear", function() {
       }
     }));
     components.add(new CppComponent({
-      grunt: {},
+      grunt: this.grunt,
       name:  "b",
       path:  "a/b/c",
       targets: { test: {} }

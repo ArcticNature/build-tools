@@ -62,7 +62,7 @@ module.exports = function(grunt) {
       function(component_name, target) {
     // Load the components collection.
     grunt.config.requires("get-components");
-    var components = grunt.config.get("get-components")();
+    var components = grunt.config.get("get-components")("clear");
 
     if (component_name) {
       var component = components.get(component_name);
