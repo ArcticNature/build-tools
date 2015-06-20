@@ -197,6 +197,11 @@ CppComponent.prototype._includes = function _includes(components, target) {
   if (this._targets[target].include) {
     include.push.apply(include, this._targets[target].include);
   }
+
+  // Use bundled-in gtest in case the system has another version.
+  if (target === "test") {
+    include.push("3rd-parties/include");
+  }
   return include;
 };
 
@@ -250,6 +255,9 @@ CppComponent.prototype._process_targets = function _process_targets(config) {
  */
 CppComponent.prototype._sources = function _sources(target) {
   var sources = [path.join(this._path, "src", "**", "*.cpp")];
+  if (target === "test") {
+    sources.push(path.join(this._path, "tests", "**", "*.cpp"));
+  }
 
   if (this._targets[target].exclude) {
     this._targets[target].exclude.forEach(function(exclude) {
@@ -356,7 +364,7 @@ CppComponent.prototype.getCleanPath = function getCleanPath(target) {
 };
 
 //Override
-Component.prototype.handleAnalysis = function handleAnalysis(components) {
+CppComponent.prototype.handleAnalysis = function handleAnalysis(components) {
   var key  = "analysis\\." + this._name;
   var name = "analysis." + this._name;
 
