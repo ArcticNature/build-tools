@@ -12,8 +12,10 @@ module.exports = function(grunt) {
     var content = "";
     components.list().forEach(function(name) {
       var component = components.get(name);
-      var tag = component.enabled() ? "enabled" : "disabled";
-      content += name + " = " + tag + "\n";
+      if (component.canDisable()) {
+        var tag = component.enabled() ? "enabled" : "disabled";
+        content += name + " = " + tag + "\n";
+      }
     });
 
     // Write back list with enabled/disabled value.

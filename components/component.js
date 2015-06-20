@@ -152,9 +152,12 @@ Component.prototype._process_targets = function _process_targets(config) {
   }
 };
 
-/**
- * @returns {!String} The colour of the component.
- */
+/** @returns {bool} True if the component can be disabled. */
+Component.prototype.canDisable = function canDisable() {
+  return this._module_type === "extension";
+};
+
+/** @returns {!String} The colour of the component. */
 Component.prototype.colour = function colour() {
   if (this._colour) {
     return this._colour;
@@ -194,7 +197,7 @@ Component.prototype.disable = function disable() {
 Component.prototype.enabled = function enabled() {
   return (
       this._module_type === "core" ||
-      this._module_type === "core-extention" ||
+      this._module_type === "core-extension" ||
       this._enabled
   );
 };
@@ -206,6 +209,11 @@ Component.prototype.enabled = function enabled() {
  */
 Component.prototype.getCleanPath = function getCleanPath(target) {
   throw new Error("Method not implemented");
+};
+
+/** @returns {!String} The type of component. */
+Component.prototype.getModuleType = function getModuleType() {
+  return this._module_type;
 };
 
 /**
@@ -235,16 +243,12 @@ Component.prototype.hasTarget = function hasTarget(target) {
   return target in this._targets;
 };
 
-/**
- * @returns {!String} The name of the component.
- */
+/** @returns {!String} The name of the component. */
 Component.prototype.name = function name() {
   return this._name;
 };
 
-/**
- * @returns {!Array} The list of targets defined for the component.
- */
+/** @returns {!Array} The list of targets defined for the component. */
 Component.prototype.targets = function targets() {
   return Object.keys(this._targets).sort();
 };
