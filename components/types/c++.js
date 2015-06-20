@@ -214,32 +214,22 @@ CppComponent.prototype._process_targets = function _process_targets(config) {
 
   targets.forEach(function(target_name) {
     _this._verifyTarget(config.targets[target_name]);
+    var target = config.targets[target_name];
 
-    var target  = config.targets[target_name];
-    var exclude = [];
-    var include = [];
-    var libs    = [];
+    // Extends a list with items from the global and the target configuration.
+    var extend = function extend(name, list) {
+      if (config[name]) {
+        list.push.apply(list, config[name]);
+      }
+      if (target[name]) {
+        list.push.apply(list, target[name]);
+      }
+      return list;
+    };
 
-    if (config.exclude) {
-      exclude.push.apply(exclude, config.exclude);
-    }
-    if (target.exclude) {
-      exclude.push.apply(exclude, target.exclude);
-    }
-
-    if (config.include) {
-      include.push.apply(include, config.include);
-    }
-    if (target.include) {
-      include.push.apply(include, target.include);
-    }
-
-    if (config.libs) {
-      libs.push.apply(libs, config.libs);
-    }
-    if (target.libs) {
-      libs.push.apply(libs, target.libs);
-    }
+    var exclude = extend("exclude", []);
+    var include = extend("include", []);
+    var libs    = extend("libs",    []);
 
     _this._targets[target_name].exclude = array_utils.filterDuplicates(exclude);
     _this._targets[target_name].include = array_utils.filterDuplicates(include);

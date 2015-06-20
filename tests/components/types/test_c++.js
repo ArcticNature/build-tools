@@ -55,7 +55,7 @@ suite("CppComponent", function() {
     test("static analysis configuration", function() {
       assert.deepEqual(this.grunt.config("cppcheck.analysis\\.test"), {
         exclude: ["3rd-parties", "te/st/tests"],
-        include: ["te/st/include"],
+        include: ["te/st/include", "3rd-parties/include"],
         save_to: "out/reports/te/st/cppcheck.xml",
         src: [ "te/st/include/**/*.h", "te/st/src/**/*.cpp"]
       });
