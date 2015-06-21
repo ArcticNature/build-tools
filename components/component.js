@@ -243,6 +243,14 @@ Component.prototype.handleTarget = function handleTarget(target, components) {
   throw new Error("Method not implemented");
 };
 
+/** @returns {bool} True if the component has an init function. */
+Component.prototype.hasModuleInit = function hasModuleInit() {
+  return (
+      this._module_type === "core-extension" ||
+      this._module_type === "extension"
+  );
+};
+
 /**
  * Checks if a target is available.
  * @param {!String} target The target to check

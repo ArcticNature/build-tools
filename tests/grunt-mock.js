@@ -84,6 +84,7 @@ GruntConfigMock.prototype.smartAccess = function smartAccess(name, value) {
  */
 var GruntFileMock = function GruntFileMock() {
   this._files = {};
+  this.wrote  = {};
 };
 
 GruntFileMock.prototype.expand = function expand() {
@@ -99,6 +100,10 @@ GruntFileMock.prototype.read = function read(file) {
     return this._files[file];
   }
   assert.fail("in", "not in", "Unepxected read of file " + file);
+};
+
+GruntFileMock.prototype.write = function read(path, content) {
+  this.wrote[path] = content;
 };
 
 /**

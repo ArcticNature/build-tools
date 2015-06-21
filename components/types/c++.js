@@ -353,6 +353,11 @@ CppComponent.prototype.getCleanPath = function getCleanPath(target) {
   return paths;
 };
 
+/** @returns {!String} the path to the component directory. */
+CppComponent.prototype.getPath = function getPath() {
+  return this._path;
+};
+
 //Override
 CppComponent.prototype.handleAnalysis = function handleAnalysis(components) {
   var key  = "analysis\\." + this._name;
