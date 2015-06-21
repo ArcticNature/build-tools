@@ -59,10 +59,20 @@ module.exports = function(grunt) {
       var name = clean_name(instance.name());
       lines.push(template.replace("{name}", name));
     });
-
-    // Write it to disk.
+    
+    // Finish file.
     content += lines.join('\n');
     content += module.exports.FOOTER;
+
+    // Compare with existing version and avoid updates if possible.
+    if (grunt.file.exists(source_path)) {
+      var current = grunt.file.read(source_path);
+      if (content === current) {
+        return;
+      }
+    }
+
+    // Write it to disk.
     grunt.file.write(source_path, content);
   };
 

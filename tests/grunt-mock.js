@@ -106,6 +106,34 @@ GruntFileMock.prototype.write = function read(path, content) {
   this.wrote[path] = content;
 };
 
+
+/**
+ * Asserts that the given path was not written to.
+ * @param {!String} path The path to check.
+ */
+GruntFileMock.prototype.assert_did_not_write = function assert_did_not_write(
+    path
+) {
+  if (!(path in this.wrote)) { return; }
+  throw new assert.AssertionError({
+    message: "Should not have written to '" + path + "'"
+  });
+};
+
+/**
+ * Asserts that the given path was written to.
+ * @param {!String} path The path to check.
+ */
+GruntFileMock.prototype.assert_wrote_to_path = function assert_wrote_to_path(
+    path
+) {
+  if (path in this.wrote) { return; }
+  assert.fail(
+      path, Object.keys(this.wrote).sort(), null,
+      "was not found in written files"
+  );
+};
+
 /**
  * Configures the files read by grunt.file.read.
  * @param {!Object} files A map from file name to content.

@@ -19,17 +19,6 @@ var assert_starts_with = function assert_starts_with(text, expected) {
   assert.equal(actual, expected);
 };
 
-var assert_wrote_to_path = function assert_wrote_to_path(grunt, path) {
-  if (path in grunt.file.wrote) {
-    return;
-  }
-
-  assert.fail(
-      path, Object.keys(grunt.file.wrote).sort(), null,
-      "was not found in written files"
-  );
-};
-
 
 gruntSuite(
     "Generate modules link", "build-tools/generate-modules-link",
@@ -100,8 +89,22 @@ gruntSuite(
     assert_starts_with(content, this.module.HEADER);
   });
 
+  test("does not write to file if there are no differences", function() {
+    var files = {};
+    files[EXPECTED_PATH] = (
+        this.module.HEADER +
+        this.module.LINE_TEMPLATE.replace("{name}", "b") + '\n' +
+        this.module.LINE_TEMPLATE.replace("{name}", "c_d") +
+        this.module.FOOTER
+    );
+
+    this.grunt.file.set_files(files);
+    this.grunt.testTask("generate-modules-link", "test");
+    this.grunt.file.assert_did_not_write(EXPECTED_PATH);
+  });
+
   test("path is computed correctly", function() {
     this.grunt.testTask("generate-modules-link", "test");
-    assert_wrote_to_path(this.grunt, EXPECTED_PATH);
+    this.grunt.file.assert_wrote_to_path(EXPECTED_PATH);
   });
 });
