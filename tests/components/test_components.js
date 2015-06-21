@@ -312,7 +312,7 @@ suite("Components", function() {
           grunt: grunt,
           deps:  deps,
           targets: { test: {} },
-          "module-type": "extention"
+          "module-type": "extension"
         }));
       };
 
@@ -339,7 +339,7 @@ suite("Components", function() {
         grunt: grunt,
         deps:  ["b"],
         targets: { test: {} },
-        "module-type": "extention"
+        "module-type": "extension"
       }));
 
       assert.throws(function() {
@@ -356,7 +356,7 @@ suite("Components", function() {
         grunt: grunt,
         deps:  ["b"],
         targets: { test: {} },
-        "module-type": "extention"
+        "module-type": "extension"
       }));
 
       assert.throws(function() {

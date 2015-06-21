@@ -182,20 +182,27 @@ suite("Component", function() {
     });
 
     test("core-extension is always enabled", function() {
-      var component = this.make("core-extention");
+      var component = this.make("core-extension");
       component.disable();
       assert(component.enabled());
     });
 
     test("extension defaults to enabled", function() {
-      var component = this.make("extention");
+      var component = this.make("extension");
       assert(component.enabled());
     });
 
     test("extension can be disabled", function() {
-      var component = this.make("extention");
+      var component = this.make("extension");
       component.disable();
       assert(!component.enabled());
+    });
+
+    test("Unrecognised modes are rejected", function() {
+      var _this = this;
+      assert.throws(function (){
+        _this.make("demo");
+      }, /Unrecognised module type 'demo'/);
     });
   });
 

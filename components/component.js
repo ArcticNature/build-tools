@@ -1,4 +1,9 @@
 var verify = require("../utils/verify");
+var KNOWN_MODULE_TYPES = {
+  "core": true,
+  "core-extension": true,
+  "extension": true
+};
 
 
 /**
@@ -15,7 +20,7 @@ var verify = require("../utils/verify");
  * 
  *  @property {?String} module-type Type of component being defined:
  *    * core: module is always enabled and has no init function [default].
- *    * core-extention: module is always enabled and has an init function.
+ *    * core-extension: module is always enabled and has an init function.
  *    * extension: module has an init function and can be disabled.
  */
 var Component = module.exports = function Component(configuration) {
@@ -43,6 +48,11 @@ var Component = module.exports = function Component(configuration) {
   this._module_type = configuration["module-type"] || "core";
   this._enabled = true;
   this._targets = {};
+
+  // Validate mode.
+  if (!KNOWN_MODULE_TYPES[this._module_type]) {
+    throw new Error("Unrecognised module type '" + this._module_type + "'");
+  }
 
   // Process targets.
   if (configuration.targets) {
