@@ -74,6 +74,7 @@ module.exports = function(grunt) {
 
     } else {
       clear_all(components);
+      grunt.task.run("hooks:post-clear");
     }
   });
 };

@@ -46,7 +46,8 @@ gruntSuite("Clear grunt task", "targets/clear", function() {
       "clean:a.debug",
       "clean:a.release",
       "clean:b.test",
-      "clean:out-dir"
+      "clean:out-dir",
+      "hooks:post-clear"
     ]);
   });
 

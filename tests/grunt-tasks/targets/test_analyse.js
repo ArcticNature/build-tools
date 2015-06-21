@@ -39,6 +39,7 @@ gruntSuite("Analyse grunt task", "targets/analyse", function() {
   test("analyse all components", function() {
     this.grunt.testTask("analyse");
     this.grunt.task.assertTaskQueue([
+      "hooks:pre-compile:test",
       "shell:test.a.demo", "shell:analysis.a.demo",
       "shell:test.b.demo", "shell:analysis.b.demo"
     ]);
@@ -47,14 +48,16 @@ gruntSuite("Analyse grunt task", "targets/analyse", function() {
   test("dependencies are schedules without analysis", function() {
     this.grunt.testTask("analyse", "b");
     this.grunt.task.assertTaskQueue([
-      "shell:test.a.demo", "shell:test.b.demo", "shell:analysis.b.demo"
+      "hooks:pre-compile:test", "shell:test.a.demo",
+      "shell:test.b.demo", "shell:analysis.b.demo"
     ]);
   });
 
   test("target is build and analysed", function() {
     this.grunt.testTask("analyse", "a");
     this.grunt.task.assertTaskQueue([
-      "shell:test.a.demo", "shell:analysis.a.demo"
+      "hooks:pre-compile:test", "shell:test.a.demo",
+      "shell:analysis.a.demo"
     ]);
   });
 });

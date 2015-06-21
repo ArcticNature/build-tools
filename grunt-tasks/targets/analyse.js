@@ -28,6 +28,7 @@ module.exports = function(grunt) {
       components = register.all("test", grunt);
     }
 
+    grunt.task.run("hooks:pre-compile:test");
     components.forEach(function(component) {
       var instance = component.instance;
       instance.handleTarget(component.target, register);

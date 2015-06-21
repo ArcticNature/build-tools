@@ -68,6 +68,7 @@ module.exports = function(grunt) {
     if (grunt.file.exists(source_path)) {
       var current = grunt.file.read(source_path);
       if (content === current) {
+        grunt.log.writeln("Skipped update of extension initalisation file.");
         return;
       }
     }

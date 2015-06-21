@@ -34,13 +34,15 @@ gruntSuite("Main grunt task", "targets/main", function() {
 
   test("dependencies are schedules too", function() {
     this.grunt.testTask("test");
-    this.grunt.task.assertTaskQueue(
-        ["shell:test.a.demo", "shell:test.b.demo"]
-    );
+    this.grunt.task.assertTaskQueue([
+      "hooks:pre-compile:test", "shell:test.a.demo", "shell:test.b.demo"
+    ]);
   });
 
   test("target is processed", function() {
     this.grunt.testTask("test", "a");
-    this.grunt.task.assertTaskQueue(["shell:test.a.demo"]);
+    this.grunt.task.assertTaskQueue([
+      "hooks:pre-compile:test", "shell:test.a.demo"
+    ]);
   });
 });

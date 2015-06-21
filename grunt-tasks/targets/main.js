@@ -27,6 +27,7 @@ module.exports = function(grunt) {
       components = register.all(target, grunt);
     }
 
+    grunt.task.run("hooks:pre-compile:" + target);
     components.forEach(function(component) {
       var instance = component.instance;
       instance.handleTarget(target, register);

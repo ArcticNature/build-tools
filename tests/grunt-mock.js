@@ -151,7 +151,8 @@ var GruntLog = function GruntLog() {
   this.verbose = new GruntVerboseLog();
 };
 GruntLog.prototype.ok = function ok() {};
-GruntLog.prototype.write = function write() {};
+GruntLog.prototype.write   = function write() {};
+GruntLog.prototype.writeln = function writeln() {};
 
 
 /**
