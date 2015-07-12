@@ -176,6 +176,9 @@ Components.prototype.inject = function inject() {
 
   all.forEach(function(dependency_name) {
     var dependency = _this.get(dependency_name);
+    if (!dependency.enabled()) {
+      return;
+    }
 
     dependency.listInjections().forEach(function(dependant_name) {
       var dependant = _this.get(dependant_name);
@@ -203,7 +206,7 @@ Components.prototype.plot = function plot(target) {
 
   components.forEach(function(name) {
     var component = _this.get(name);
-    if (!component.hasTarget(target)) {
+    if (!component.enabled() || !component.hasTarget(target)) {
       return;
     }
 

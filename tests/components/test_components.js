@@ -77,6 +77,20 @@ suite("Components", function() {
       assert.throws(block, /Ambiguous dependency for component 'c'/);
     });
 
+    test("only enabled components are injected", function() {
+      this.add_component("a");
+      this.add_component("b", ["a"]);
+      this.add_component("c", [], ["b"]);
+
+      this.components.get("c").disable();
+      this.components.inject();
+      var deps = this.components.resolve("b", "test").map(function(dep) {
+        return dep.instance.name();
+      });
+
+      assert.deepEqual(deps, ["a", "b"]);
+    });
+
     test("simple dependencies are injected", function() {
       this.add_component("a");
       this.add_component("b", ["a"]);
@@ -572,6 +586,19 @@ suite("Components", function() {
           "  \"a\" -> \"b\" [color = \"#fedcba\"]\n" +
           "}\n"
       );
+    });
+
+    test("skip disabled components", function() {
+      this.components.add(new Component({
+        grunt: {},
+        name:  "a",
+        colour:  "#abcdef",
+        targets: { test: {} },
+        "module-type": "extension"
+      }));
+
+      this.components.get("a").disable();
+      assert.equal(this.components.plot("test"), "digraph test {\n}\n");
     });
   });
 });
