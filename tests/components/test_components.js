@@ -47,6 +47,50 @@ suite("Components", function() {
     });
   });
 
+  suite("Dependencies injection", function() {
+    setup(function() {
+      var components = this.components;
+      var grunt = this.grunt = new GruntMock();
+
+      this.add_component = function (name, deps, inject) {;
+        components.add(new Component({
+          name:   name,
+          grunt:  grunt,
+          deps:   deps,
+          inject: inject,
+          targets: { release: {}, test: {} },
+          "module-type": "extension"
+        }));
+      };
+    });
+
+    test("confliction dependencies are detected", function() {
+      this.add_component("a");
+      this.add_component("b", ["a", "release.c"]);
+      this.add_component("c", [], ["b"]);
+
+      var _this = this;
+      var block = function() {
+        _this.components.inject();
+      };
+
+      assert.throws(block, /Ambiguous dependency for component 'c'/);
+    });
+
+    test("simple dependencies are injected", function() {
+      this.add_component("a");
+      this.add_component("b", ["a"]);
+      this.add_component("c", [], ["b"]);
+
+      this.components.inject();
+      var deps = this.components.resolve("b", "test").map(function(dep) {
+        return dep.instance.name();
+      });
+
+      assert.deepEqual(deps, ["a", "c", "b"]);
+    });
+  });
+
   suite("Dependencies navigation", function() {
     test("all targets do not include duplicates", function() {
       // Add nodes to the graph.

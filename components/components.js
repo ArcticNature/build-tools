@@ -167,6 +167,24 @@ Components.prototype.has = function has(name) {
 };
 
 /**
+ * Injects components into the dependency list of the component
+ * that should depend on them.
+ */
+Components.prototype.inject = function inject() {
+  var _this = this;
+  var all = this.list();
+
+  all.forEach(function(dependency_name) {
+    var dependency = _this.get(dependency_name);
+
+    dependency.listInjections().forEach(function(dependant_name) {
+      var dependant = _this.get(dependant_name);
+      dependant.addDependency(dependency_name);
+    });
+  });
+};
+
+/**
  * @returns {!Array.<!String>} list of components in the collection.
  */
 Components.prototype.list = function list() {

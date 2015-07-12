@@ -4,13 +4,22 @@ var HEX_COLOUR = /#[a-fA-F0-9]{6}/;
 
 /**
  * Verifies that a value is an Array.
- * @param {!Array}  value   The value to check.
- * @param {!String} message The failure message for the thrown exception.
+ * @param {!Array}    value   The value to check.
+ * @param {!String}   message The failure message for the thrown exception.
+ * @param {?Function} checker Optional function used to check each element.
  */
-verify.array = function array(value, message) {
+verify.array = function array(value, message, checker) {
   if (!Array.isArray(value)) {
     throw new Error(message);
   }
+
+  if (!checker) {
+    return;
+  }
+
+  value.forEach(function(item) {
+    checker(item, message);
+  });
 };
 
 /**
@@ -48,12 +57,13 @@ verify.notNullObjectIfDefined = function notNullObject(value, message) {
 
 /**
  * Verifies that a value is undefined or is an array.
- * @param {?Array}  value   The value to check.
- * @param {!String} message The failure message for the thrown exception.
+ * @param {?Array}    value   The value to check.
+ * @param {!String}   message The failure message for the thrown exception.
+ * @param {?Function} checker Optional function used to check each element.
  */
-verify.optionalArray = function optionalArray(value, message) {
+verify.optionalArray = function optionalArray(value, message, checker) {
   if (typeof value !== "undefined") {
-    verify.array(value, message);
+    verify.array(value, message, checker);
   }
 };
 

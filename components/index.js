@@ -76,7 +76,6 @@ index.getComponents = function getComponents(grunt, target) {
   count = components_definitions.length;
   grunt.log.write("Loading " + count + " components ... ");
   components = index.loadFiles(components_definitions, grunt);
-  components.verify();
   grunt.log.ok();
 
   // Load enabled/disabled components.
@@ -100,8 +99,13 @@ index.getComponents = function getComponents(grunt, target) {
   } else {
     grunt.log.verbose.error("Missing components config file: " + conf_path);
   }
-
   grunt.log.ok();
+
+  grunt.log.write("Injecting dependencies and verifing configuration ... ");
+  components.inject();
+  components.verify();
+  grunt.log.ok();
+
   components_singleton = components;
   return components;
 };

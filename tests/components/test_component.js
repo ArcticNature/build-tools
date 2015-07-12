@@ -42,6 +42,28 @@ suite("Component", function() {
       assert.throws(block, /Grunt instance not valid/);
     });
 
+    test("fails if injector is not a list", function() {
+      var block = function() {
+        new Component({
+          grunt: {},
+          name: "a",
+          inject: "abc"
+        });
+      };
+      assert.throws(block, /Invalid injection list. Array of string required./);
+    });
+
+    test("fails if injector is not a list of strings", function() {
+      var block = function() {
+        new Component({
+          grunt: {},
+          name: "a",
+          inject: ["abc", 0]
+        });
+      };
+      assert.throws(block, /Invalid injection list. Array of string required./);
+    });
+
     test("fails if name is not given", function() {
       var block = function() {
         new Component({ grunt: {} });

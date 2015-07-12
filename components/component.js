@@ -40,10 +40,16 @@ var Component = module.exports = function Component(configuration) {
       configuration["module-type"],
       "If defined, the module-type property must be a string."
   );
+  verify.optionalArray(
+      configuration.inject,
+      "Invalid injection list. Array of string required.",
+      verify.notEmptyString
+  );
 
   // Store it in the new instance.
   this._colour = configuration.colour;
   this._grunt  = configuration.grunt;
+  this._inject = configuration.inject || [];
   this._name   = configuration.name;
   this._module_type = configuration["module-type"] || "core";
   this._enabled = true;
@@ -162,6 +168,26 @@ Component.prototype._process_targets = function _process_targets(config) {
   }
 };
 
+/**
+ * Adds a dependency to all the targets of the component.
+ * @param {!String} name The name of the dependency to add.
+ */
+Component.prototype.addDependency = function addDependency(name) {
+  var _this   = this;
+  var targets = Object.keys(this._targets);
+
+  targets.forEach(function(target) {
+    var deps = [];
+    var parsed_name = Component.parseDependencyName(name, target);
+
+    deps.push.apply(deps, _this._targets[target].deps);
+    deps.push(parsed_name);
+
+    deps = Component.checkDependenciesList(deps);
+    _this._targets[target].deps = deps;
+  });
+};
+
 /** @returns {bool} True if the component can be disabled. */
 Component.prototype.canDisable = function canDisable() {
   return this._module_type === "extension";
@@ -259,6 +285,11 @@ Component.prototype.hasModuleInit = function hasModuleInit() {
 Component.prototype.hasTarget = function hasTarget(target) {
   verify.notEmptyString(target, "Target to check for must be a string");
   return target in this._targets;
+};
+
+/** @returns {!Array.<String>} the list of components to be injected into. */
+Component.prototype.listInjections = function listInjections() {
+  return this._inject;
 };
 
 /** @returns {!String} The name of the component. */
