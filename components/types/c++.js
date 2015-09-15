@@ -1,7 +1,8 @@
 var path = require("path");
 
 var Component = require("../component");
-var ScriptsComponent = require("./scripts");
+var ProtoBufComponent = require("./protobuf");
+var ScriptsComponent  = require("./scripts");
 
 var array_utils = require("../../utils/array");
 var verify = require("../../utils/verify");
@@ -167,7 +168,7 @@ CppComponent.prototype._dynamicLibraries = function _dynamicLibraries(
     var should_check = (
         dep instanceof CppComponent &&
         dep._targets[dep_target].type === "lib"
-    );
+    ) || dep instanceof ProtoBufComponent;
     if (should_check) {
       libs.push.apply(libs, dep._targets[dep_target].libs || []);
     }
@@ -276,7 +277,7 @@ CppComponent.prototype._staticLibraries = function _staticLibraries(
     var should_check = (
         dep instanceof CppComponent &&
         dep._targets[dep_target].type === "lib"
-    );
+    ) || dep instanceof ProtoBufComponent;
     if (should_check) {
       libs.push(path.join(
           "out", "dist", dep_target, dep._path, dep.name() + ".a"

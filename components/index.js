@@ -6,8 +6,9 @@ var Components = require("./components");
 var verify = require("../utils/verify");
 
 var TYPES = {
-  "c++":   require("./types/c++"),
-  scripts: require("./types/scripts")
+  "c++":    require("./types/c++"),
+  protobuf: require("./types/protobuf"),
+  scripts:  require("./types/scripts")
 };
 
 var index = module.exports = {};
