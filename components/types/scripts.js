@@ -234,6 +234,11 @@ _validateTaskOrScript(task_or_script) {
 };
 
 //@override
+ScriptsComponent.prototype.getCppHeaders = function getCppHeaders(target) {
+  return [path.join(this._path, "include")];
+};
+
+//@override
 ScriptsComponent.prototype.getCleanPath = function getCleanPath(target) {
   return this._template(this._clear_path, target);
 };

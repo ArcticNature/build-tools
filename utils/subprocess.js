@@ -75,7 +75,10 @@ SubProcess.prototype._logFail = function _logFail(code) {
   if (this._silent) {
     fn = this._logger.verbose.error;
   }
-  fn("Exit code %s for command %s %s", code, this._cmd, this._args.join(" "));
+  fn.call(
+      this._logger, "Exit code %s for command %s %s",
+      code, this._cmd, this._args.join(" ")
+  );
 };
 
 SubProcess.prototype._logStart = function _logStart() {
@@ -83,7 +86,7 @@ SubProcess.prototype._logStart = function _logStart() {
   if (this._silent) {
     fn = this._logger.verbose.ok;
   }
-  fn("%s %s", this._cmd, this._args.join(" "));
+  fn.call(this._logger, "%s %s", this._cmd, this._args.join(" "));
 };
 
 SubProcess.prototype.spawn = function spawn() {

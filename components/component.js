@@ -247,9 +247,36 @@ Component.prototype.getCleanPath = function getCleanPath(target) {
   throw new Error("Method not implemented");
 };
 
+/**
+ * Returns a list of C/C++ header files exposed by this component.
+ * @param {!String} target The target to get the headers for.
+ * @returns {!Array.<!String>} Headers file exposed.
+ */
+Component.prototype.getCppHeaders = function getCppHeaders(target) {
+  return [];
+};
+
+/**
+ * Returns a list of C/C++ dynamic libraries needed by this component.
+ * @param {!String} target The target to get the dynamic libraries for.
+ * @returns {!Array.<!String>} Static libraries exposed.
+ */
+Component.prototype.getDynamicLibs = function getDynamicLibs(target) {
+  return [];
+};
+
 /** @returns {!String} The type of component. */
 Component.prototype.getModuleType = function getModuleType() {
   return this._module_type;
+};
+
+/**
+ * Returns a list of C/C++ static libraries exposed by this component.
+ * @param {!String} target The target to get the static libraries for.
+ * @returns {!Array.<!String>} Static libraries exposed.
+ */
+Component.prototype.getStaticLibs = function getStaticLibs(target) {
+  return [];
 };
 
 /**

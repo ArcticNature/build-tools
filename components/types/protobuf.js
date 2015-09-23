@@ -40,13 +40,13 @@ ProtoBuf.prototype._compileCC = function _compileCC(key, name, target) {
  * @param {!String} target The target to compile.
  */
 ProtoBuf.prototype._compileLib = function _compileLib(key, name, target) {
-  this._grunt.config("ar." + key + "\\.lib", {
+  this._grunt.config("ar." + key, {
     files: [{
       dest: path.join("out", "dist", target, this._path, this._name + ".a"),
       src:  path.join("out", "build", target, this._path, "**", "*.o")
     }]
   });
-  this._grunt.task.run("ar:" + name + ".lib");
+  this._grunt.task.run("ar:" + name);
 };
 
 /**
@@ -56,7 +56,7 @@ ProtoBuf.prototype._compileLib = function _compileLib(key, name, target) {
  * @param {!String} target The target to compile.
  */
 ProtoBuf.prototype._compileProto = function _compileProto(key, name, target) {
-  var sources = [path.join(this._path, "**", "*.proto")];
+  var sources = [path.join("**", "*.proto")];
   if (this._targets[target].exclude) {
     this._targets[target].exclude.forEach(function(exclude) {
       sources.push("!" + exclude);
@@ -64,8 +64,9 @@ ProtoBuf.prototype._compileProto = function _compileProto(key, name, target) {
   }
 
   this._grunt.config("protobuf-cpp." + key, {
-    base_path: this._path,
-    objects_path: path.join("out", "build", target),
+    input_path:  path.join(this._path, "src"),
+    headers_out: path.join("out", "dist", target, "headers", this._path),
+    objects_out: path.join("out", "build", target),
     src: sources
   });
   this._grunt.task.run("protobuf-cpp:" + name);
@@ -107,9 +108,20 @@ ProtoBuf.prototype._process_targets = function _process_targets(config) {
 ProtoBuf.prototype.getCleanPath = function getCleanPath(target) {
   var paths = [
     path.join("out", "build", target, this._path),
-    path.join("out", "dist",  target, this._path)
+    path.join("out", "dist",  target, this._path),
+    path.join("out", "dist",  target, "headers", this._path)
   ];
   return paths;
+};
+
+//@override
+ProtoBuf.prototype.getCppHeaders = function getCppHeaders(target) {
+  return [path.join("out", "dist", target, "headers", this._path)];
+};
+
+//@override
+ProtoBuf.prototype.getStaticLibs = function getStaticLibs(target) {
+  return [path.join("out", "dist", target, this._path, this.name() + ".a")];
 };
 
 //Override

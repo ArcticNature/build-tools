@@ -77,6 +77,11 @@ GruntConfigMock.prototype.smartAccess = function smartAccess(name, value) {
   return this.set(name, value);
 };
 
+/** Asserts that the grunt configuration is empty. */
+GruntConfigMock.prototype.assertEmpty = function assertEmpty() {
+  assert.deepEqual(this._config, {}, "Cnfiguration not empty");
+};
+
 
 /**
  * @class GruntFileMock
@@ -84,11 +89,27 @@ GruntConfigMock.prototype.smartAccess = function smartAccess(name, value) {
  */
 var GruntFileMock = function GruntFileMock() {
   this._files = {};
+  this.mapped = [];
   this.wrote  = {};
+
+  // Alias some functions to the original version.
+  this.copy  = grunt.file.copy;
+  this.mkdir = grunt.file.mkdir;
 };
 
 GruntFileMock.prototype.expand = function expand() {
   return [];
+};
+
+GruntFileMock.prototype.expandMapping = function expandMapping(src, dst, opts) {
+  var mappings = grunt.file.expandMapping(src, dst, opts);
+  this.mapped.push({
+    destination: dst,
+    mappings: mappings,
+    options:  opts,
+    sources:  src
+  });
+  return mappings;
 };
 
 GruntFileMock.prototype.exists = function exists(path) {
@@ -149,8 +170,11 @@ GruntFileMock.prototype.set_files = function set_files(files) {
  */
 var GruntLog = function GruntLog() {
   this.verbose = new GruntVerboseLog();
+  this.ok_logs = [];
 };
-GruntLog.prototype.ok = function ok() {};
+GruntLog.prototype.ok = function ok(text) {
+  this.ok_logs.push(text);
+};
 GruntLog.prototype.write   = function write() {};
 GruntLog.prototype.writeln = function writeln() {};
 
@@ -191,8 +215,33 @@ GruntTaskMock.prototype.assertTaskQueue = function assertTaskQueue(queue) {
  * @param {!Object} grunt The grunt instance.
  */
 var GruntThisMock = function GruntThisMock(name, grunt) {
-  this.name = name;
+  this.name   = name;
   this._grunt = grunt;
+
+  this._is_async = false;
+  this._callback = null;
+};
+
+/** @returns {!Function} Returns the async callback. */
+GruntThisMock.prototype.async = function async() {
+  this._is_async = true;
+  return this._callback;
+};
+
+GruntThisMock.prototype.options = function options(defaults, source) {
+  var result = {};
+
+  // Copy defaults.
+  Object.keys(defaults).forEach(function(key) {
+    result[key] = defaults[key];
+  });
+
+  // Extend results.
+  Object.keys(source).forEach(function(key) {
+    result[key] = source[key];
+  });
+
+  return result;
 };
 
 
@@ -209,6 +258,7 @@ var GruntMock = module.exports = function GruntMock() {
   this.task   = new GruntTaskMock();
 
   // Not everything needs mocking.
+  this.option   = grunt.option;
   this.template = grunt.template;
 };
 
@@ -224,6 +274,18 @@ GruntMock.prototype.registerTask = function registerTask(name, desc, task) {
     throw new Error("Task '" + name + "' already defined");
   }
   this._tasks[name] = task;
+};
+
+/**
+ * Registers a multitask.
+ * @param {!String}   name The name of the task to register.
+ * @param {?String}   desc The description of the task.
+ * @param {!Function} task The task itself.
+ */
+GruntMock.prototype.registerMultiTask = function registerMultiTask(
+    name, desc, task
+) {
+  return this.registerTask(name, desc, task);
 };
 
 
@@ -250,6 +312,16 @@ GruntMock.prototype.testTask = function testTask(name/*, varargs */) {
   );
 };
 
+/**
+ * Runs a registered task with the given parameters.
+ * @param {!String} name The task to run.
+ * @returns {!TestTaskCaller} the return value of the task.
+ */
+GruntMock.prototype.taskCaller = function taskCaller(name) {
+  this.assertHasTask(name);
+  return new TestTaskCaller(this, name);
+};
+
 
 /**
  * @class GruntVerboseLog
@@ -258,3 +330,63 @@ GruntMock.prototype.testTask = function testTask(name/*, varargs */) {
 var GruntVerboseLog = function GruntVerboseLog() {};
 GruntVerboseLog.prototype.error = function error() {};
 GruntVerboseLog.prototype.ok = function ok() {};
+
+
+/**
+ * @class TestTaskCaller
+ * Helper class to test grunt task execution.
+ * 
+ * @param {!Object} mock The GruntMock that owns the task.
+ * @param {!String} name The name of the task to run.
+ */
+var TestTaskCaller = function TestTaskCaller(mock, name) {
+  this._mock = mock;
+  this._name = name;
+
+  this._callback = null;
+  this._data = {};
+};
+
+/**
+ * Sets the callback function for when the task completes.
+ * @param {!Function} done The done callback.
+ */
+TestTaskCaller.prototype.async = function async(done) {
+  this._callback = done;
+};
+
+/**
+ * Sets the task data.
+ * @param {*} data The data for the task.
+ */
+TestTaskCaller.prototype.data = function data(data) {
+  this._data = data;
+};
+
+/** Runs the task. */
+TestTaskCaller.prototype.run = function run(/* varargs */) {
+  var task = this._mock._tasks[this._name];
+  var task_this  = new GruntThisMock(this._name, this._mock);
+
+  // Populate task configuration.
+  task_this._callback = this._callback;
+  task_this.data = this._data;
+
+  // Deal with the callback too.
+  try {
+    var result = task.apply(task_this, arguments);
+    if (!task_this._is_async && this._callback) {
+      this._callback();
+    }
+    return result;
+
+  } catch (ex) {
+    if (task_this._is_async && this._callback) {
+      this._callback(ex);
+      return;
+    }
+
+    // Re-throw the exception for sync tasks.
+    throw ex;
+  }
+};

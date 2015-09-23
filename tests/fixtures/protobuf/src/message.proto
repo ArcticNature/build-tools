@@ -1,0 +1,3 @@
+message Message {
+  required uint64 code = 1;
+}

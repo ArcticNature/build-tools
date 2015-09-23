@@ -8,20 +8,28 @@ module.exports = function(grunt) {
   var protobuf_cpp = function protobuf_cpp() {
     // Prepare task and options.
     var options = this.options({
-      // Required options.
-      base_path:    null,
-      objects_path: null,
+      input_path:  null,
+      headers_out: null,
+      objects_out: null,
       src: null
     }, this.data);
 
     // Assert require parameters were provided.
-    assert(options.base_path, "A base path for the proto files is required.");
-    assert(options.objects_path, "A path of the object files is required.");
+    assert(options.input_path, "Input path for proto files is required.");
+    assert(
+        options.headers_out,
+        "Output path for the generated header files is required."
+    );
+    assert(
+        options.objects_out,
+        "Output path for the generated C++ files is required."
+    );
     assert(options.src, "A list of files to compile.");
 
     // Build paths.
-    var sources = grunt.file.expandMapping(options.src, options.objects_path, {
-      ext:    ".pb",
+    var sources = grunt.file.expandMapping(options.src, options.objects_out, {
+      cwd: options.input_path,
+      ext: ".pb",
       extDot: "last"
     });
 
@@ -42,8 +50,8 @@ module.exports = function(grunt) {
 
       // Build arguments.
       var instance_args = [
-        "--proto_path", options.base_path,
-        "--cpp_out", target, source.src[0]
+        "--proto_path", options.input_path,
+        "--cpp_out", options.objects_out, source.src[0]
       ];
 
       // Return subprocess wrapper.
@@ -55,11 +63,27 @@ module.exports = function(grunt) {
 
     // And compile!
     var done = this.async();
-    SubProcess.spawnAll(children, grunt.option("parallel")).then(function() {
+    var promise = SubProcess.spawnAll(children, grunt.option("parallel"));
+
+    // Copy the generated heade files.
+    promise = promise.then(function() {
+      var headers = grunt.file.expandMapping("**/*.pb.h", options.headers_out, {
+        cwd: options.objects_out
+      });
+
+      headers.forEach(function(header) {
+        grunt.file.copy(header.src[0], header.dest);
+      });
+    });
+
+    promise.then(function() {
       done();
     }).fail(function(code) {
       done(new Error(code));
     });
+
+    // Return children for tests to examine.
+    return children;
   };
 
   grunt.registerMultiTask(

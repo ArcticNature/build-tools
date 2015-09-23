@@ -163,15 +163,7 @@ CppComponent.prototype._dynamicLibraries = function _dynamicLibraries(
   var deps = components.resolve(this._name, target);
 
   deps.forEach(function(dep) {
-    var dep_target = dep.target;
-    dep = dep.instance;
-    var should_check = (
-        dep instanceof CppComponent &&
-        dep._targets[dep_target].type === "lib"
-    ) || dep instanceof ProtoBufComponent;
-    if (should_check) {
-      libs.push.apply(libs, dep._targets[dep_target].libs || []);
-    }
+    libs.push.apply(libs, dep.instance.getDynamicLibs(dep.target));
   });
 
   libs.push.apply(libs, this._targets[target].libs || []);
@@ -189,10 +181,7 @@ CppComponent.prototype._includes = function _includes(components, target) {
   var deps    = components.resolve(this._name, target);
 
   deps.forEach(function(dep) {
-    dep = dep.instance;
-    if (dep instanceof CppComponent || dep instanceof ScriptsComponent) {
-      include.push(path.join(dep._path, "include"));
-    }
+    include.push.apply(include, dep.instance.getCppHeaders(dep.target));
   });
 
   if (this._targets[target].include) {
@@ -272,17 +261,7 @@ CppComponent.prototype._staticLibraries = function _staticLibraries(
   var deps = components.resolve(this._name, target);
 
   deps.forEach(function(dep) {
-    var dep_target = dep.target;
-    dep = dep.instance;
-    var should_check = (
-        dep instanceof CppComponent &&
-        dep._targets[dep_target].type === "lib"
-    ) || dep instanceof ProtoBufComponent;
-    if (should_check) {
-      libs.push(path.join(
-          "out", "dist", dep_target, dep._path, dep.name() + ".a"
-      ));
-    }
+    libs.push.apply(libs, dep.instance.getStaticLibs(dep.target));
   });
 
   libs.reverse();
@@ -354,9 +333,30 @@ CppComponent.prototype.getCleanPath = function getCleanPath(target) {
   return paths;
 };
 
+//@override
+CppComponent.prototype.getCppHeaders = function getCppHeaders(target) {
+  return [path.join(this._path, "include")];
+};
+
+//@override
+CppComponent.prototype.getDynamicLibs = function getDynamicLibs(target) {
+  if (this._targets[target].type === "lib") {
+    return this._targets[target].libs || [];
+  }
+  return [];
+};
+
 /** @returns {!String} the path to the component directory. */
 CppComponent.prototype.getPath = function getPath() {
   return this._path;
+};
+
+//@override
+CppComponent.prototype.getStaticLibs = function getStaticLibs(target) {
+  if (this._targets[target].type === "lib") {
+    return [path.join("out", "dist", target, this._path, this.name() + ".a")];
+  }
+  return [];
 };
 
 //Override
