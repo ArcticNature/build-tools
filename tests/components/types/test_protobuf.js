@@ -3,11 +3,8 @@ var mocha  = require("mocha");
 //var path   = require("path");
 
 var GruntMock    = require("../../grunt-mock");
-//var Component    = require("../../../components/component");
 var Components = require("../../../components/components");
 var ProtoBuf   = require("../../../components/types/protobuf");
-
-//var GCOVR_PATH = path.resolve("build-tools/gcovr");
 
 
 suite("ProtoBuf Component", function() {
@@ -36,7 +33,7 @@ suite("ProtoBuf Component", function() {
   test("C/C++ headers path", function() {
     var component = this.make();
     assert.deepEqual(component.getCppHeaders("debug"), [
-      "out/dist/debug/headers/te/st"
+      "out/dist/debug/headers"
     ]);
   });
 
@@ -80,8 +77,7 @@ suite("ProtoBuf Component", function() {
       this.grunt.task.assertTaskQueue([
         "protobuf-cpp:debug.test",
         "g++:debug.test",
-        "ar:debug.test",
-        //""
+        "ar:debug.test"
       ]);
     });
 

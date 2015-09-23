@@ -116,7 +116,12 @@ ProtoBuf.prototype.getCleanPath = function getCleanPath(target) {
 
 //@override
 ProtoBuf.prototype.getCppHeaders = function getCppHeaders(target) {
-  return [path.join("out", "dist", target, "headers", this._path)];
+  return [path.join("out", "dist", target, "headers")];
+};
+
+//@override
+ProtoBuf.prototype.getDynamicLibs = function getDynamicLibs(target) {
+  return this._targets[target].libs || [];
 };
 
 //@override
