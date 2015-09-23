@@ -66,7 +66,7 @@ ProtoBuf.prototype._compileProto = function _compileProto(key, name, target) {
   this._grunt.config("protobuf-cpp." + key, {
     input_path:  path.join(this._path, "src"),
     headers_out: path.join("out", "dist", target, "headers", this._path),
-    objects_out: path.join("out", "build", target),
+    objects_out: path.join("out", "build", target, this._path),
     src: sources
   });
   this._grunt.task.run("protobuf-cpp:" + name);

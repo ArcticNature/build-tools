@@ -89,7 +89,7 @@ suite("ProtoBuf Component", function() {
       assert.deepEqual(this.grunt.config("protobuf-cpp.debug\\.test"), {
         input_path:  "te/st/src",
         headers_out: "out/dist/debug/headers/te/st",
-        objects_out: "out/build/debug",
+        objects_out: "out/build/debug/te/st",
         src: ["**/*.proto"]
       });
     });
