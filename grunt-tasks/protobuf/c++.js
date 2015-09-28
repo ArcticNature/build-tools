@@ -33,7 +33,31 @@ module.exports = function(grunt) {
       extDot: "last"
     });
 
-    // TODO(stefano): Check last modified to see if re-generation is needed.
+    // Check last modified to see if re-generation is needed.
+    sources = sources.filter(function (source) {
+      try {
+        var base    = path.normalize(source.dest);
+        var start   = fs.statSync(source.src[0]).mtime.getTime();
+        var targets = [
+          base + ".cc", base + ".h",
+          options.headers_out + source.dest.substr(
+              options.objects_out.length
+          ) + ".h"
+        ];
+
+        var newest = Math.max.apply(Math, targets.map(function(input) {
+          return fs.statSync(input).mtime.getTime();
+        }));
+        return start > newest;
+
+      } catch(ex) { /* NOOP */ }
+      return true;
+    });
+
+    if (sources.length === 0) {
+      grunt.log.ok("Target up to date, nothing to do.");
+      return;
+    }
 
     // Bail if dry run.
     if (grunt.option("no-write")) {
