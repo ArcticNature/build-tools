@@ -13,10 +13,10 @@ var CppComponent = require("../../components/types/c++");
  * @returns {!String} the clean name.
  */
 var clean_name = function clean_name(name) {
-  name = name.replace("-", "_");
-  name = name.replace("~", "_");
-  name = name.replace(";", "_");
-  name = name.replace("#", "_");
+  name = name.replace(/-/g, "_");
+  name = name.replace(/~/g, "_");
+  name = name.replace(/;/g, "_");
+  name = name.replace(/#/g, "_");
   return name;
 };
 
