@@ -60,7 +60,54 @@ suite("NodeJS Component", function() {
     });
   });
 
-  suite("handle debug", function() {
+  suite("Handle Analysis", function() {
+    setup(function() {
+      this.component = this.make({
+        targets: { debug: {} },
+        jshint: {
+          globals: {
+            require: true,
+            dummy: false
+          }
+        }
+      });
+
+      this.components.add(this.component);
+      this.component.handleAnalysis(this.components);
+    });
+
+    test("jshint task is loaded", function() {
+      this.grunt.assertNpmTaskLoaded("grunt-contrib-jshint");
+    });
+
+    test("jshint is configured", function() {
+      var config = {};
+      Object.keys(NodeJS.JSHINT_DEFAULTS).forEach(function(key) {
+        config[key] = NodeJS.JSHINT_DEFAULTS[key];
+      });
+      config.globals = {
+        require: true,
+        dummy: false
+      };
+
+      assert.deepEqual(this.grunt.config("jshint.test\\.test"), {
+        options: config,
+        files: { src: [
+          "out/dist/test/te/st/**/*.js",
+          "!out/dist/test/te/st/deps/**",
+          "!**/node_modules/**"
+        ] }
+      });
+    });
+
+    test("tasks queued", function() {
+      this.grunt.task.assertTaskQueue([
+        "jshint:test.test"
+      ]);
+    });
+  });
+
+  suite("Handle debug", function() {
     setup(function() {
       this.component = this.make({
         targets: { debug: {} }
