@@ -24,7 +24,7 @@ module.exports = function(grunt) {
         options.objects_out,
         "Output path for the generated C++ files is required."
     );
-    assert(options.src, "A list of files to compile.");
+    assert(options.src, "A list of files to compile is needed.");
 
     // Build paths.
     var sources = grunt.file.expandMapping(options.src, options.objects_out, {

@@ -90,6 +90,7 @@ GruntConfigMock.prototype.assertEmpty = function assertEmpty() {
 var GruntFileMock = function GruntFileMock() {
   this._files = {};
   this.mapped = [];
+  this.real_expand = false;
   this.wrote  = {};
 
   // Alias some functions to the original version.
@@ -98,6 +99,9 @@ var GruntFileMock = function GruntFileMock() {
 };
 
 GruntFileMock.prototype.expand = function expand() {
+  if (this.real_expand) {
+    return grunt.file.expand.apply(grunt.file, arguments);
+  }
   return [];
 };
 
@@ -170,7 +174,11 @@ GruntFileMock.prototype.set_files = function set_files(files) {
  */
 var GruntLog = function GruntLog() {
   this.verbose = new GruntVerboseLog();
+  this.error_logs = [];
   this.ok_logs = [];
+};
+GruntLog.prototype.error = function error(text) {
+  this.error_logs.push(text);
 };
 GruntLog.prototype.ok = function ok(text) {
   this.ok_logs.push(text);
@@ -375,6 +383,7 @@ TestTaskCaller.prototype.run = function run(/* varargs */) {
   // Deal with the callback too.
   try {
     var result = task.apply(task_this, arguments);
+    this.latest_result = result;
     if (!task_this._is_async && this._callback) {
       this._callback();
     }
