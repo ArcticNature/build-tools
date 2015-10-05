@@ -137,9 +137,8 @@ NodeJS.prototype.handleAnalysis = function handleAnalysis(components) {
   // Lint source (config from component.json with additional configuration).
   this._lintSources(key, name);
 
-  // npm install
-  // mocha test execution.
-  // Coverage results.
+  // TODO(stefano): npm install && mocha test execution.
+  // TODO(stefano): Coverage results.
 };
 
 //@override

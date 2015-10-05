@@ -21,7 +21,7 @@ var assert_starts_with = function assert_starts_with(text, expected) {
 
 
 gruntSuite(
-    "Generate modules link", "build-tools/generate-modules-link",
+    "Generate modules link", "generic/generate-modules-link",
     function() {
   setup(function() {
     var components = new Components();
