@@ -259,6 +259,7 @@ GruntThisMock.prototype.options = function options(defaults, source) {
  */
 var GruntMock = module.exports = function GruntMock() {
   this._tasks = {};
+  this._npm_tasks = [];
 
   this.config = (new GruntConfigMock()).createCallable();
   this.file   = new GruntFileMock();
@@ -270,6 +271,14 @@ var GruntMock = module.exports = function GruntMock() {
   this.template = grunt.template;
 };
 
+
+/**
+ * Loads a grunt task from an NPM instlled module.
+ * @param {!String} name The name of the module to load.
+ */
+GruntMock.prototype.loadNpmTasks = function loadNpmTasks(name) {
+  this._npm_tasks.push(name);
+};
 
 /**
  * Registers a simple task.
@@ -305,6 +314,15 @@ GruntMock.prototype.assertHasTask = function assertHasTask(name) {
   if (!(name in this._tasks)) {
     assert.fail(null, name, "simple task '" + name + "' not registered");
   }
+};
+
+/**
+ * Asserts that an npm task is loaded.
+ * @param {!String} name The name of the module to check.
+ */
+GruntMock.prototype.assertNpmTaskLoaded = function assertNpmTaskLoaded(name) {
+  var idx = this._npm_tasks.indexOf(name);
+  assert(idx !== -1, "Did not load npm task '" + name + "'.");
 };
 
 /**

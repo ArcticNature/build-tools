@@ -271,6 +271,23 @@ Component.prototype.getModuleType = function getModuleType() {
 };
 
 /**
+ * Returns a list of partial grunt file mappings.
+ * 
+ * These mappings are used by NodeJS components to copy the needed files
+ * into their destination directoryes.
+ * As such, the mappings will have a source but should not have a dest
+ * attribute, which will be set by the component that includes this.
+ * 
+ * @param {!String} target The target to get the deps for.
+ * @returns {!Array} An array of grunt file mappings without a dest attribute.
+ */
+Component.prototype.getNodeJsDependencies = function getNodeJsDependencies(
+    target
+) {
+  return [];
+};
+
+/**
  * Returns a list of C/C++ static libraries exposed by this component.
  * @param {!String} target The target to get the static libraries for.
  * @returns {!Array.<!String>} Static libraries exposed.

@@ -7,6 +7,7 @@ var verify = require("../utils/verify");
 
 var TYPES = {
   "c++":    require("./types/c++"),
+  nodejs:   require("./types/nodejs"),
   protobuf: require("./types/protobuf"),
   scripts:  require("./types/scripts")
 };

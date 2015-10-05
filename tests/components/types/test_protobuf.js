@@ -1,7 +1,7 @@
 var assert = require("assert");
 var mocha  = require("mocha");
 
-var GruntMock    = require("../../grunt-mock");
+var GruntMock  = require("../../grunt-mock");
 var Components = require("../../../components/components");
 var ProtoBuf   = require("../../../components/types/protobuf");
 
@@ -113,6 +113,15 @@ suite("ProtoBuf Component", function() {
       };
     });
 
+    test("deps have correct source", function() {
+      var component = this.make_target("debug");
+      assert.deepEqual(component.getNodeJsDependencies("debug"), [{
+        expand: true,
+        cwd: "out/dist/debug/te/st",
+        src: "test.js"
+      }]);
+    });
+
     test("tasks queued", function() {
       var component = this.make_target("debug");
       component.handleTarget("debug", this.components);
@@ -128,7 +137,7 @@ suite("ProtoBuf Component", function() {
 
       assert.deepEqual(this.grunt.config("protobuf-js.debug\\.test"), {
         minify: false,
-        output: "out/build/debug/te/st/test.js",
+        output: "out/dist/debug/te/st/test.js",
         src: "te/st/src/**/*.proto"
       });
     });
@@ -139,7 +148,7 @@ suite("ProtoBuf Component", function() {
 
       assert.deepEqual(this.grunt.config("protobuf-js.release\\.test"), {
         minify: true,
-        output: "out/build/release/te/st/test.js",
+        output: "out/dist/release/te/st/test.js",
         src: "te/st/src/**/*.proto"
       });
     });

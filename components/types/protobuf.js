@@ -47,7 +47,7 @@ ProtoBuf.prototype._compileCC = function _compileCC(key, name, target) {
 ProtoBuf.prototype._compileJS = function _compileJS(key, name, target) {
   var target_name = this.name() + ".js";
   var source = path.join(this._path, "src", "**", "*.proto");
-  var output = path.join("out", "build", target, this._path, target_name);
+  var output = path.join("out", "dist", target, this._path, target_name);
 
   this._grunt.config("protobuf-js." + key, {
     minify: target === "release",
@@ -147,6 +147,23 @@ ProtoBuf.prototype.getCppHeaders = function getCppHeaders(target) {
 //@override
 ProtoBuf.prototype.getDynamicLibs = function getDynamicLibs(target) {
   return this._targets[target].libs || [];
+};
+
+//@override
+ProtoBuf.prototype.getNodeJsDependencies = function getNodeJsDependencies(
+    target
+) {
+  if (!this._generate_js) {
+    return [];
+  }
+
+  var target_name = this.name() + ".js";
+  var output = path.join("out", "dist", target, this._path);
+  return [{
+    expand: true,
+    cwd: output,
+    src: target_name
+  }];
 };
 
 //@override
