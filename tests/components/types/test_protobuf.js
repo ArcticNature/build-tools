@@ -1,6 +1,5 @@
 var assert = require("assert");
 var mocha  = require("mocha");
-//var path   = require("path");
 
 var GruntMock    = require("../../grunt-mock");
 var Components = require("../../../components/components");
@@ -21,13 +20,14 @@ suite("ProtoBuf Component", function() {
     };
   });
 
-  test("Clear path", function() {
-    var component = this.make();
-    assert.deepEqual(component.getCleanPath("debug"), [
-      "out/build/debug/te/st",
-      "out/dist/debug/te/st",
-      "out/dist/debug/headers/te/st"
-    ]);
+  test("C/C++ generation is disabled", function() {
+    var component = this.make({
+      generate: { "c++": false },
+      targets: { debug: {} }
+    });
+
+    component.handleTarget("debug", this.components);
+    this.grunt.task.assertTaskQueue([]);
   });
 
   test("C/C++ headers path", function() {
@@ -41,6 +41,15 @@ suite("ProtoBuf Component", function() {
     var component = this.make();
     assert.deepEqual(component.getStaticLibs("debug"), [
       "out/dist/debug/te/st/test.a"
+    ]);
+  });
+
+  test("Clear path", function() {
+    var component = this.make();
+    assert.deepEqual(component.getCleanPath("debug"), [
+      "out/build/debug/te/st",
+      "out/dist/debug/te/st",
+      "out/dist/debug/headers/te/st"
     ]);
   });
 
@@ -65,7 +74,7 @@ suite("ProtoBuf Component", function() {
     });
   });
 
-  suite("Protoc tasks", function() {
+  suite("ProtoC tasks", function() {
     setup(function() {
       this.component = this.make({
         targets: { debug: {} }
@@ -87,6 +96,51 @@ suite("ProtoBuf Component", function() {
         headers_out: "out/dist/debug/headers/te/st",
         objects_out: "out/build/debug/te/st",
         src: ["**/*.proto"]
+      });
+    });
+  });
+
+  suite("JS tasks", function() {
+    setup(function() {
+      this.make_target = function(target) {
+        var config = {
+          generate: { "c++": false, js: true },
+          targets: {}
+        };
+
+        config.targets[target] = {};
+        return this.make(config);
+      };
+    });
+
+    test("tasks queued", function() {
+      var component = this.make_target("debug");
+      component.handleTarget("debug", this.components);
+
+      this.grunt.task.assertTaskQueue([
+        "protobuf-js:debug.test"
+      ]);
+    });
+
+    test("protobuf-js configured", function() {
+      var component = this.make_target("debug");
+      component.handleTarget("debug", this.components);
+
+      assert.deepEqual(this.grunt.config("protobuf-js.debug\\.test"), {
+        minify: false,
+        output: "out/build/debug/te/st/test.js",
+        src: "te/st/src/**/*.proto"
+      });
+    });
+
+    test("release is minified", function() {
+      var component = this.make_target("release");
+      component.handleTarget("release", this.components);
+
+      assert.deepEqual(this.grunt.config("protobuf-js.release\\.test"), {
+        minify: true,
+        output: "out/build/release/te/st/test.js",
+        src: "te/st/src/**/*.proto"
       });
     });
   });

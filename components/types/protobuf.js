@@ -13,6 +13,11 @@ var array_utils = require("../../utils/array");
 var ProtoBuf = module.exports = function ProtoBuf(configuration) {
   Component.call(this, configuration);
   this._path = configuration.path;
+
+  // ProtoBuf target.
+  var gen = configuration.generate || {};
+  this._generate_cpp = "c++" in gen ? gen["c++"] : true;
+  this._generate_js  = gen.js || false;
 };
 ProtoBuf.prototype = Object.create(Component.prototype);
 
@@ -31,6 +36,26 @@ ProtoBuf.prototype._compileCC = function _compileCC(key, name, target) {
     src: [path.join("out", "build", target, this._path, "**", "*.cc")]
   });
   this._grunt.task.run("g++:" + name);
+};
+
+/**
+ * Configures and enqueues tasks for compiling the JavaScript CommonJS module.
+ * @param {!String} key    The base configuration key for generated tasks.
+ * @param {!String} name   The base task name for generated tasks.
+ * @param {!String} target The target to compile.
+ */
+ProtoBuf.prototype._compileJS = function _compileJS(key, name, target) {
+  var target_name = this.name() + ".js";
+  var source = path.join(this._path, "src", "**", "*.proto");
+  var output = path.join("out", "build", target, this._path, target_name);
+
+  this._grunt.config("protobuf-js." + key, {
+    minify: target === "release",
+    output: output,
+    src: source
+  });
+
+  this._grunt.task.run("protobuf-js:" + name);
 };
 
 /**
@@ -141,7 +166,15 @@ ProtoBuf.prototype.handleTarget = function handleTarget(target, components) {
   var key  = target + "\\." + this._name;
   var name = target + "." + this._name;
 
-  this._compileProto(key, name, target);
-  this._compileCC(key, name, target);
-  this._compileLib(key, name, target);
+  // C++ related configuration.
+  if (this._generate_cpp) {
+    this._compileProto(key, name, target);
+    this._compileCC(key, name, target);
+    this._compileLib(key, name, target);
+  }
+
+  // JS related configuration.
+  if (this._generate_js) {
+    this._compileJS(key, name, target);
+  }
 };

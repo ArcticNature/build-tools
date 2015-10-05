@@ -18,7 +18,7 @@ module.exports = function(grunt) {
     }, this.data);
 
     assert(options.output, "An output file is required.");
-    assert(options.src, "A list of files to compile is needed.");
+    assert(options.src, "A (list of) globs for files to compile is needed.");
 
     // Check last modified to see if re-generation is needed.
     var sources = grunt.file.expand(options.src);
