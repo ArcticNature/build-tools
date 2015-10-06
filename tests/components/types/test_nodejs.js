@@ -53,7 +53,7 @@ suite("NodeJS Component", function() {
     assert.deepEqual(this.grunt.config("copy.debug\\.test\\.deps"), {
       files: [{
         expand: true,
-        dest: "out/dist/debug/te/st/deps/dep",
+        dest: "out/dist/debug/te/st/module/deps/dep",
         cwd:  "out/dist/debug/d/e/p",
         src:  "dep.js"
       }]
@@ -76,10 +76,6 @@ suite("NodeJS Component", function() {
       this.component.handleAnalysis(this.components);
     });
 
-    test("jshint task is loaded", function() {
-      this.grunt.assertNpmTaskLoaded("grunt-contrib-jshint");
-    });
-
     test("jshint is configured", function() {
       var config = {};
       Object.keys(NodeJS.JSHINT_DEFAULTS).forEach(function(key) {
@@ -94,16 +90,52 @@ suite("NodeJS Component", function() {
         options: config,
         files: { src: [
           "out/dist/test/te/st/**/*.js",
-          "!out/dist/test/te/st/deps/**",
+          "!out/dist/test/te/st/module/deps/**",
           "!**/node_modules/**"
         ] }
       });
     });
 
+    test("jshint task is loaded", function() {
+      this.grunt.assertNpmTaskLoaded("grunt-contrib-jshint");
+    });
+
+    test("mocha is configured", function() {
+      assert.deepEqual(this.grunt.config("mochaTest.test\\.test"), {
+        options: {
+          ignoreLeaks: false,
+          ui: "tdd"
+        },
+        src: "out/dist/test/te/st/tests/**/test_*.js"
+      });
+    });
+
+    test("npm is configured", function() {
+      assert.deepEqual(this.grunt.config("npm-install.test\\.test"), {
+        options: {
+          dest: "out/dist/test/te/st/module"
+        }
+      });
+    });
+
     test("tasks queued", function() {
       this.grunt.task.assertTaskQueue([
-        "jshint:test.test"
+        "jshint:test.test",
+        "npm-install:test.test",
+        "copy:test.test.tests",
+        "mochaTest:test.test"
       ]);
+    });
+
+    test("tests are copied", function() {
+      assert.deepEqual(this.grunt.config("copy.test\\.test\\.tests"), {
+        files: [{
+          expand: true,
+          cwd:  "te/st/tests",
+          dest: "out/dist/test/te/st/tests",
+          src:  ["**/test_*.js", "!node_modules/**"]
+        }]
+      });
     });
   });
 
@@ -126,12 +158,12 @@ suite("NodeJS Component", function() {
         files: [{
           expand: true,
           cwd:  "te/st/src",
-          dest: "out/dist/debug/te/st",
+          dest: "out/dist/debug/te/st/module",
           src:  ["**/*.js", "!node_modules/**"]
         }, {
           expand: true,
           cwd:  "te/st",
-          dest: "out/dist/debug/te/st",
+          dest: "out/dist/debug/te/st/module",
           src:  ["package.json"]
         }]
       });

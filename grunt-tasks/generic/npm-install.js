@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
   var path = require("path");
 
-  grunt.registerTask("npm-install", "Runs npm install.", function() {
+  grunt.registerMultiTask("npm-install", "Runs npm install.", function() {
     var done    = this.async();
     var fs      = require("fs");
     var npm     = require("npm");

@@ -22,11 +22,17 @@ var JSHINT_DEFAULTS = {
   maxlen:   80
 };
 
+var MOCHA_DEFAULTS = {
+  ignoreLeaks: false,
+  ui: "tdd"
+};
+
 
 var NodeJS = module.exports = function NodeJS(configuration) {
   Component.call(this, configuration);
   this._path = configuration.path;
   this._jshint_conf = configuration.jshint || {};
+  this._mocha_conf  = configuration.mocha || {};
 };
 NodeJS.prototype = Object.create(Component.prototype);
 NodeJS.JSHINT_DEFAULTS = JSHINT_DEFAULTS;
@@ -44,7 +50,7 @@ NodeJS.prototype._copyDependencies = function _copyDependencies(
 ) {
   var deps  = components.resolve(this._name, target);
   var files = [];
-  var root  = path.join("out", "dist", target, this._path, "deps");
+  var root  = path.join("out", "dist", target, this._path, "module", "deps");
 
   deps.pop();
   deps.forEach(function(dep) {
@@ -70,15 +76,16 @@ NodeJS.prototype._copyDependencies = function _copyDependencies(
  * @param {!String} target The target being compiled.
  */
 NodeJS.prototype._copySources = function _copySources(key, name, target) {
+  var root  = path.join("out", "dist", target, this._path, "module");
   var mappings = [{
     expand: true,
     cwd:  path.join(this._path, "src"),
-    dest: path.join("out", "dist", target, this._path),
+    dest: root,
     src:  ["**/*.js", "!node_modules/**"]
   }, {
     expand: true,
     cwd:  this._path,
-    dest: path.join("out", "dist", target, this._path),
+    dest: path.join(root),
     src:  ["package.json"]
   }];
 
@@ -90,6 +97,7 @@ NodeJS.prototype._copySources = function _copySources(key, name, target) {
 /**
  * Configures and enqueues JsHint for the project.
  * Node modules and external dependencies are not linted.
+ * Configuration is loaded from component.json to override the above default.
  * 
  * @param {!String} key  The base configuration key for generated tasks.
  * @param {!String} name The base task name for generated tasks.
@@ -105,18 +113,63 @@ NodeJS.prototype._lintSources = function(key, name) {
     config[key] = user_conf[key];
   });
 
+  var base_path = path.join("out", "dist", "test", this._path);
   this._grunt.loadNpmTasks("grunt-contrib-jshint");
   this._grunt.config("jshint." + key, {
     options: config,
     files: {
       src: [
-        path.join("out", "dist", "test", this._path, "**", "*.js"),
-        "!" + path.join("out", "dist", "test", this._path, "deps", "**"),
+        path.join(base_path, "**", "*.js"),
+        "!" + path.join(base_path, "module", "deps", "**"),
         "!**/node_modules/**"
       ]
     }
   });
   this._grunt.task.run("jshint:" + name);
+};
+
+/**
+ * Runs mocha tests on the component.
+ * Npm installs dependencies before running the tests.
+ * 
+ * @param {!String} key  The base configuration key for generated tasks.
+ * @param {!String} name The base task name for generated tasks.
+ */
+NodeJS.prototype._test = function _test(key, name) {
+  // Configure npm and mocha tests.
+  var base_path  = path.join("out", "dist", "test", this._path);
+  var mocha_conf = {};
+  var mocha_user = this._mocha_conf;
+
+  Object.keys(MOCHA_DEFAULTS).forEach(function(key) {
+    mocha_conf[key] = MOCHA_DEFAULTS[key];
+  });
+  Object.keys(mocha_user).forEach(function(key) {
+    mocha_conf[key] = mocha_user[key];
+  });
+
+  this._grunt.config("npm-install." + key, {
+    options: {
+      dest: path.join(base_path, "module")
+    }
+  });
+  this._grunt.config("copy." + key + "\\.tests", {
+    files: [{
+      expand: true,
+      cwd:  path.join(this._path, "tests"),
+      dest: path.join(base_path, "tests"),
+      src:  ["**/test_*.js", "!node_modules/**"]
+    }]
+  });
+  this._grunt.config("mochaTest." + key, {
+    options: mocha_conf,
+    src: path.join(base_path, "tests", "**", "test_*.js")
+  });
+
+  // Schedule tasks.
+  this._grunt.task.run("npm-install:" + name);
+  this._grunt.task.run("copy:" + name + ".tests");
+  this._grunt.task.run("mochaTest:" + name);
 };
 
 
@@ -134,10 +187,8 @@ NodeJS.prototype.handleAnalysis = function handleAnalysis(components) {
   var key  = "test\\." + this._name;
   var name = "test." + this._name;
 
-  // Lint source (config from component.json with additional configuration).
   this._lintSources(key, name);
-
-  // TODO(stefano): npm install && mocha test execution.
+  this._test(key, name);
   // TODO(stefano): Coverage results.
 };
 
