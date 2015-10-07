@@ -6,6 +6,9 @@ var mocha = require("../grunt-suite");
 
 gruntSuite("ProtoJS task", "protobuf/js", function() {
   setup(function(done) {
+    // Increase test timeout as the RaspberryPi running Jenkins needs more time.
+    this.timeout(10 * 1000);
+
     var task_caller = this.task_caller = this.grunt.taskCaller("protobuf-js");
     task_caller.async(done);
 
