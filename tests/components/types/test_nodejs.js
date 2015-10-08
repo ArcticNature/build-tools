@@ -66,8 +66,8 @@ suite("NodeJS Component", function() {
         targets: { debug: {} },
         jshint: {
           globals: {
-            require: true,
-            dummy: false
+            dummy: false,
+            something: true
           }
         }
       });
@@ -78,13 +78,17 @@ suite("NodeJS Component", function() {
 
     test("jshint is configured", function() {
       var config = {};
+      config.globals = {};
+
       Object.keys(NodeJS.JSHINT_DEFAULTS).forEach(function(key) {
         config[key] = NodeJS.JSHINT_DEFAULTS[key];
       });
-      config.globals = {
-        require: true,
-        dummy: false
-      };
+      Object.keys(NodeJS.JSHINT_KNOWN_GLOBALS).forEach(function(key) {
+        config.globals[key] = NodeJS.JSHINT_KNOWN_GLOBALS[key];
+      });
+
+      config.globals.dummy = false;
+      config.globals.something = true;
 
       assert.deepEqual(this.grunt.config("jshint.test\\.test"), {
         options: config,
@@ -120,9 +124,9 @@ suite("NodeJS Component", function() {
 
     test("tasks queued", function() {
       this.grunt.task.assertTaskQueue([
+        "copy:test.test.tests",
         "jshint:test.test",
         "npm-install:test.test",
-        "copy:test.test.tests",
         "mochaTest:test.test"
       ]);
     });
@@ -133,7 +137,7 @@ suite("NodeJS Component", function() {
           expand: true,
           cwd:  "te/st/tests",
           dest: "out/dist/test/te/st/tests",
-          src:  ["**/test_*.js", "!node_modules/**"]
+          src:  ["**/*.js", "!node_modules/**"]
         }]
       });
     });

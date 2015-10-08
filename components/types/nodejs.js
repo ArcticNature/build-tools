@@ -17,9 +17,22 @@ var JSHINT_DEFAULTS = {
   quotmark: true,
   undef:    true,
   unused:   true,
-  strict:   true,
+  strict:   false,
   trailing: true,
   maxlen:   80
+};
+
+var JSHINT_KNOWN_GLOBALS = {
+  // node.js
+  console: false,
+  module:  false,
+  process: false,
+  require: false,
+
+  // mocha.js
+  setup: false,
+  suite: false,
+  test:  false
 };
 
 var MOCHA_DEFAULTS = {
@@ -36,6 +49,7 @@ var NodeJS = module.exports = function NodeJS(configuration) {
 };
 NodeJS.prototype = Object.create(Component.prototype);
 NodeJS.JSHINT_DEFAULTS = JSHINT_DEFAULTS;
+NodeJS.JSHINT_KNOWN_GLOBALS = JSHINT_KNOWN_GLOBALS;
 
 
 /**
@@ -70,7 +84,7 @@ NodeJS.prototype._copyDependencies = function _copyDependencies(
 };
 
 /**
- * Copies the soirce files and npm package files to the distribution directory.
+ * Copies the source files and npm package files to the distribution directory.
  * @param {!String} key  The base configuration key for generated tasks.
  * @param {!String} name The base task name for generated tasks.
  * @param {!String} target The target being compiled.
@@ -95,6 +109,24 @@ NodeJS.prototype._copySources = function _copySources(key, name, target) {
 };
 
 /**
+ * Copyes the test files to the test distribution directory.
+ * @param {!String} key  The base configuration key for generated tasks.
+ * @param {!String} name The base task name for generated tasks.
+ */
+NodeJS.prototype._copyTests = function _copyTests(key, name) {
+  var base_path = path.join("out", "dist", "test", this._path);
+  this._grunt.config("copy." + key + "\\.tests", {
+    files: [{
+      expand: true,
+      cwd:  path.join(this._path, "tests"),
+      dest: path.join(base_path, "tests"),
+      src:  ["**/*.js", "!node_modules/**"]
+    }]
+  });
+  this._grunt.task.run("copy:" + name + ".tests");
+};
+
+/**
  * Configures and enqueues JsHint for the project.
  * Node modules and external dependencies are not linted.
  * Configuration is loaded from component.json to override the above default.
@@ -111,6 +143,16 @@ NodeJS.prototype._lintSources = function(key, name) {
   });
   Object.keys(user_conf).forEach(function(key) {
     config[key] = user_conf[key];
+  });
+
+  // Ensure that default node.js globals are registered with JsHint.
+  if (!config.globals) {
+    config.globals = {};
+  }
+  Object.keys(JSHINT_KNOWN_GLOBALS).forEach(function(known_global) {
+    if (!config.globals.hasOwnProperty(known_global)) {
+      config.globals[known_global] = JSHINT_KNOWN_GLOBALS[known_global];
+    }
   });
 
   var base_path = path.join("out", "dist", "test", this._path);
@@ -153,14 +195,6 @@ NodeJS.prototype._test = function _test(key, name) {
       dest: path.join(base_path, "module")
     }
   });
-  this._grunt.config("copy." + key + "\\.tests", {
-    files: [{
-      expand: true,
-      cwd:  path.join(this._path, "tests"),
-      dest: path.join(base_path, "tests"),
-      src:  ["**/test_*.js", "!node_modules/**"]
-    }]
-  });
   this._grunt.config("mochaTest." + key, {
     options: mocha_conf,
     src: path.join(base_path, "tests", "**", "test_*.js")
@@ -168,7 +202,6 @@ NodeJS.prototype._test = function _test(key, name) {
 
   // Schedule tasks.
   this._grunt.task.run("npm-install:" + name);
-  this._grunt.task.run("copy:" + name + ".tests");
   this._grunt.task.run("mochaTest:" + name);
 };
 
@@ -187,6 +220,7 @@ NodeJS.prototype.handleAnalysis = function handleAnalysis(components) {
   var key  = "test\\." + this._name;
   var name = "test." + this._name;
 
+  this._copyTests(key, name);
   this._lintSources(key, name);
   this._test(key, name);
   // TODO(stefano): Coverage results.
