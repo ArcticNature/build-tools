@@ -27,7 +27,8 @@ suite("NodeJS Component", function() {
     var component = this.make();
     assert.deepEqual(component.getCleanPath("debug"), [
       "out/build/debug/te/st",
-      "out/dist/debug/te/st"
+      "out/dist/debug/te/st",
+      "out/reports/te/st"
     ]);
   });
 
@@ -108,7 +109,13 @@ suite("NodeJS Component", function() {
       assert.deepEqual(this.grunt.config("mochaTest.test\\.test"), {
         options: {
           ignoreLeaks: false,
-          ui: "tdd"
+          ui: "tdd",
+
+          reporter: "mocha-jenkins-reporter",
+          reporterOptions: {
+            junit_report_name: "test",
+            junit_report_path: "out/reports/te/st/test-results.xml"
+          }
         },
         src: "out/dist/test/te/st/tests/**/test_*.js"
       });

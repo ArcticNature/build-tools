@@ -37,6 +37,7 @@ var JSHINT_KNOWN_GLOBALS = {
 
 var MOCHA_DEFAULTS = {
   ignoreLeaks: false,
+  reporter: "mocha-jenkins-reporter",
   ui: "tdd"
 };
 
@@ -135,6 +136,7 @@ NodeJS.prototype._copyTests = function _copyTests(key, name) {
  * @param {!String} name The base task name for generated tasks.
  */
 NodeJS.prototype._lintSources = function(key, name) {
+  // Generate configuration.
   var config = {};
   var user_conf = this._jshint_conf;
 
@@ -190,6 +192,19 @@ NodeJS.prototype._test = function _test(key, name) {
     mocha_conf[key] = mocha_user[key];
   });
 
+  // Deal with XML generating reporter.
+  var xml_reporter = mocha_conf.reporter === "mocha-jenkins-reporter";
+  var write_report = !this._grunt.option("no-write");
+
+  if (xml_reporter && write_report) {
+    var report_dir = path.join("out", "reports", this._path);
+    var report_path = path.join(report_dir, "test-results.xml");
+
+    mocha_conf.reporterOptions = {};
+    mocha_conf.reporterOptions.junit_report_name = this.name();
+    mocha_conf.reporterOptions.junit_report_path = report_path;
+  }
+
   this._grunt.config("npm-install." + key, {
     options: {
       dest: path.join(base_path, "module")
@@ -210,7 +225,8 @@ NodeJS.prototype._test = function _test(key, name) {
 NodeJS.prototype.getCleanPath = function getCleanPath(target) {
   var paths = [
     path.join("out", "build", target, this._path),
-    path.join("out", "dist",  target, this._path)
+    path.join("out", "dist",  target, this._path),
+    path.join("out", "reports", this._path)
   ];
   return paths;
 };

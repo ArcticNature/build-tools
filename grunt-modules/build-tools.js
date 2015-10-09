@@ -3,7 +3,13 @@ module.exports = function(grunt_module) {
     src: "build-tools/tests/**/test_*.js",
     options: {
       ignoreLeaks: false,
-      ui: "tdd"
+      ui: "tdd",
+
+      reporter: "mocha-jenkins-reporter",
+      reporterOptions: {
+        junit_report_name: "built-tools",
+        junit_report_path: "out/reports/build-tools/test-results.xml"
+      }
     }
   });
   grunt_module.configure("clean", "build-tools", "tmp/");
