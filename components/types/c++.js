@@ -346,6 +346,18 @@ CppComponent.prototype.getDynamicLibs = function getDynamicLibs(target) {
   return [];
 };
 
+//@override
+CppComponent.prototype.getOutput = function getOutput(target) {
+  var type   = this._targets[target].type;
+  var output = path.join("out", "dist", target, this._path, this._name);
+
+  if (type === "lib") {
+    return output + ".a";
+  }
+
+  return output;
+};
+
 /** @returns {!String} the path to the component directory. */
 CppComponent.prototype.getPath = function getPath() {
   return this._path;

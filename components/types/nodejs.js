@@ -231,6 +231,15 @@ NodeJS.prototype.getCleanPath = function getCleanPath(target) {
   return paths;
 };
 
+//@Override
+NodeJS.prototype.getOutput = function getOutput(target) {
+  return {
+    expand: true,
+    cwd: path.join("out", "dist", target, this._path, "module"),
+    src: "**"
+  };
+};
+
 //@override
 NodeJS.prototype.handleAnalysis = function handleAnalysis(components) {
   var key  = "test\\." + this._name;

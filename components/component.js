@@ -288,6 +288,25 @@ Component.prototype.getNodeJsDependencies = function getNodeJsDependencies(
 };
 
 /**
+ * Returns the path to the output to the item build by this component.
+ * 
+ * @param {!String} target The target to get the output path for.
+ * @returns {!String|!Object}
+ *     Path or to the item build by this target or object describing
+ *     the files built by this target.
+ *     
+ *     If this method returns an object,
+ *     the object has the following properties:
+ *     
+ *       * cwd: the `cwd` option to `grunt.file.copy`.
+ *       * expand: the `expand` option to `grunt.file.copy`.
+ *       * src: the `src` option to `grunt.file.copy`, this is mandatory.
+ */
+Component.prototype.getOutput = function getOutput(target) {
+  throw new Error("Method not implemented");
+};
+
+/**
  * Returns a list of C/C++ static libraries exposed by this component.
  * @param {!String} target The target to get the static libraries for.
  * @returns {!Array.<!String>} Static libraries exposed.

@@ -127,6 +127,10 @@ GruntFileMock.prototype.read = function read(file) {
   assert.fail("in", "not in", "Unepxected read of file " + file);
 };
 
+GruntFileMock.prototype.readJSON = function readJSON(file) {
+  return JSON.parse(this.read(file));
+};
+
 GruntFileMock.prototype.write = function read(path, content) {
   this.wrote[path] = content;
 };
@@ -356,6 +360,7 @@ GruntMock.prototype.taskCaller = function taskCaller(name) {
 var GruntVerboseLog = function GruntVerboseLog() {};
 GruntVerboseLog.prototype.error = function error() {};
 GruntVerboseLog.prototype.ok = function ok() {};
+GruntVerboseLog.prototype.write = function write() {};
 
 
 /**
