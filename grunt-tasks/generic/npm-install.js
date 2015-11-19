@@ -1,10 +1,9 @@
 module.exports = function(grunt) {
+  var fs   = require("fs");
   var path = require("path");
+  var SubProcess = require("../../utils/subprocess");
 
   grunt.registerMultiTask("npm-install", "Runs npm install.", function() {
-    var done    = this.async();
-    var fs      = require("fs");
-    var npm     = require("npm");
     var options = this.options({
       dest: "./out"
     });
@@ -14,22 +13,28 @@ module.exports = function(grunt) {
     if (skipInstall) {
       grunt.log.writeln("Skipping npm install.");
       grunt.log.writeln(
-          "A 'node_modules' directory was found.");
+          "A 'node_modules' directory was found."
+      );
       grunt.log.writeln(
-          "If the tests fail due to dependencies issues try delating it and");
+          "If the tests fail due to dependencies issues try delating it and"
+      );
       grunt.log.writeln("let me install the dependencies from scretch.");
-      return done();
+      return;
     }
 
-    npm.load({
-      prefix: options.dest
-    }, function(err) {
-      if (err) { return done(err); }
+    // Call npm install from the target directory.
+    var npm = new SubProcess(grunt.log, {
+      args: ["install"],
+      cmd:  "npm",
+      cwd:  options.dest
+    });
 
-      npm.commands.install(function (err, data) {
-        done(err);
-      });
-      npm.on("log", grunt.log.write.bind(grunt.log));
+    var done = this.async();
+    npm.spawn().then(function() {
+      done();
+
+    }).fail(function(code) {
+      done(new Error(code));
     });
   });
 };
