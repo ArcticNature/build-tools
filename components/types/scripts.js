@@ -24,6 +24,10 @@ var ScriptsComponent = module.exports = function ScriptsComponent(
   this._analysis = configuration.analysis;
   this._clear_path = configuration["clear-path"];
   this._path = configuration.path;
+
+  this._include_path = configuration["include-path"];
+  this._dynamic_libs = configuration["dynamic-libs"] || [];
+  this._static_libs  = configuration["static-libs"]  || [];
 };
 ScriptsComponent.prototype = Object.create(Component.prototype);
 
@@ -235,12 +239,25 @@ _validateTaskOrScript(task_or_script) {
 
 //@override
 ScriptsComponent.prototype.getCppHeaders = function getCppHeaders(target) {
+  if (this._include_path) {
+    return this._include_path;
+  }
   return [path.join(this._path, "include")];
 };
 
 //@override
 ScriptsComponent.prototype.getCleanPath = function getCleanPath(target) {
   return this._template(this._clear_path, target);
+};
+
+//@override
+ScriptsComponent.prototype.getDynamicLibs = function getDynamicLibs(target) {
+  return this._dynamic_libs;
+};
+
+//@override
+ScriptsComponent.prototype.getStaticLibs = function getStaticLibs(target) {
+  return this._static_libs;
 };
 
 //@override
