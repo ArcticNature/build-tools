@@ -38,7 +38,7 @@ module.exports = function(grunt) {
     if (options.include && options.include.length > 0) {
       // Find greatest last modified time for each include path.
       var times = options.include.map(function(include) {
-        var headers = grunt.file.expand(include + "/**/*.h");
+        var headers = grunt.file.expand(include + "/**/*.{h,hpp}");
         headers = headers.map(function(header) {
           return fs.statSync(header).mtime.getTime();
         });
