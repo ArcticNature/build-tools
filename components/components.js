@@ -210,12 +210,11 @@ Components.prototype.plot = function plot(target) {
       return;
     }
 
-    var deps = _this.resolve(name, target);
-    deps.pop();
+    var deps = component.dependencies(target);
     graph += "  \"";
 
     deps.forEach(function(dep) {
-      graph += dep.instance.name() + "\" -> \"";
+      graph += dep.name + "\" -> \"";
     });
 
     var colour = component.colour();

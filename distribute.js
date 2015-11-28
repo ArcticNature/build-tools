@@ -140,7 +140,7 @@ DistributionBuilder.prototype._processComponents = function _processComponents(
     }
 
     grunt.config("copy.distribute\\." + component, {
-      mode:  true,
+      options: { mode: true },
       files: [{
           expand: src.expand || false,
           cwd:  src.cwd || ".",

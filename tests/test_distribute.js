@@ -116,7 +116,7 @@ suite("DistributionBuilder", function() {
 
     test("copies executable", function() {
       assert.deepEqual(this.grunt.config("copy.distribute\\.core"), {
-        mode:  true,
+        options: { mode:  true },
         files: [{
             expand: false,
             cwd:  ".",
@@ -144,7 +144,7 @@ suite("DistributionBuilder", function() {
 
     test("copies static object", function() {
       assert.deepEqual(this.grunt.config("copy.distribute\\.lib"), {
-        mode:  true,
+        options: { mode:  true },
         files: [{
             expand: false,
             cwd:  ".",
@@ -173,7 +173,7 @@ suite("DistributionBuilder", function() {
 
     test("copies module", function() {
       assert.deepEqual(this.grunt.config("copy.distribute\\.cli"), {
-        mode:  true,
+        options: { mode:  true },
         files: [{
             expand: true,
             cwd:  "out/dist/release/code/cli/module",
@@ -190,7 +190,7 @@ suite("DistributionBuilder", function() {
       this.builder.build("core");
 
       assert.deepEqual(this.grunt.config("copy.distribute\\.core"), {
-        mode:  true,
+        options: { mode:  true },
         files: [{
             expand: false,
             cwd:  ".",

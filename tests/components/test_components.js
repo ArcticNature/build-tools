@@ -588,6 +588,36 @@ suite("Components", function() {
       );
     });
 
+    test("indirect dependnecy", function() {
+      this.components.add(new Component({
+        grunt: {},
+        name:  "a",
+        colour:  "#abcdef",
+        targets: { test: {} }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "b",
+        colour:  "#fedcba",
+        targets: { test: { deps: ["a"] } }
+      }));
+      this.components.add(new Component({
+        grunt: {},
+        name:  "c",
+        colour:  "#123456",
+        targets: { test: { deps: ["b"] } }
+      }));
+
+      assert.equal(
+          this.components.plot("test"),
+          "digraph test {\n" +
+          "  \"a\" [color = \"#abcdef\"]\n" +
+          "  \"a\" -> \"b\" [color = \"#fedcba\"]\n" +
+          "  \"b\" -> \"c\" [color = \"#123456\"]\n" +
+          "}\n"
+      );
+    });
+
     test("skip disabled components", function() {
       this.components.add(new Component({
         grunt: {},
