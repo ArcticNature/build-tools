@@ -1,7 +1,8 @@
 var assert = require("assert");
 var mocha  = require("mocha");
 
-var Component = require("../../components/component");
+var Component  = require("../../components/component");
+var Components = require("../../components/components");
 
 
 suite("Component", function() {
@@ -256,6 +257,72 @@ suite("Component", function() {
           block,
           /If defined, the deps property of target 'test' must be an array/
       );
+    });
+  });
+
+  suite("Graph", function() {
+    setup(function() {
+      var components = this.components = new Components();
+
+      this.make = function make(name, deps) {
+        var conf = {
+          colour: "#00000" + name,
+          deps:  deps || [],
+          grunt: {},
+          name:  name,
+          path:  "path/" + name,
+          targets: {
+            test: {}
+          }
+        };
+
+        var c = new Component(conf);
+        components.add(c);
+        return c;
+      };
+    });
+
+    test("without dependencies is empty", function() {
+      var a = this.make("a");
+      assert.deepEqual(a.graph(this.components, "test"), {
+        edges: [],
+        nodes: {
+          a: { colour: "#00000a", label: "a" }
+        }
+      });
+    });
+
+    test("with dependencies has one edge", function() {
+      this.make("a");
+      var b = this.make("b", ["a"]);
+      assert.deepEqual(b.graph(this.components, "test"), {
+        edges: [{
+          from: "a",
+          to:   "b",
+          colour: "#00000b"
+        }],
+        nodes: {
+          a: { colour: "#00000a", label: "a" },
+          b: { colour: "#00000b", label: "b" }
+        }
+      });
+    });
+
+    test("with indirect dependencies", function() {
+      this.make("a");
+      this.make("b", ["a"]);
+      var c = this.make("c", ["b"]);
+      assert.deepEqual(c.graph(this.components, "test"), {
+        edges: [{
+          from: "b",
+          to:   "c",
+          colour: "#00000c"
+        }],
+        nodes: {
+          b: { colour: "#00000b", label: "b" },
+          c: { colour: "#00000c", label: "c" }
+        }
+      });
     });
   });
 });

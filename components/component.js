@@ -195,10 +195,10 @@ Component.prototype.canDisable = function canDisable() {
 
 /** @returns {!String} The colour of the component. */
 Component.prototype.colour = function colour() {
-  if (this._colour) {
-    return this._colour;
+  if (!this._colour) {
+    this._colour = "#" + Math.floor(Math.random() * 16777215).toString(16);
   }
-  return "#" + Math.floor(Math.random() * 16777215).toString(16);
+  return this._colour;
 };
 
 /**
@@ -313,6 +313,62 @@ Component.prototype.getOutput = function getOutput(target) {
  */
 Component.prototype.getStaticLibs = function getStaticLibs(target) {
   return [];
+};
+
+/**
+ * Returns a graph description for the component.
+ *
+ * The graph desctiption has the following format:
+ *   * nodes: map from node ID to node description
+ *     * label:  string describing the label.
+ *     * colour: string with the colour of the node.
+ *   * edges: list of directed edges mapping node ids.
+ *
+ * @param {!Object} components The components registry.
+ * @param {!String} target     The build target to generate the graph for.
+ * @returns {!Object} Direct dependencies graph for this component.
+ */
+Component.prototype.graph = function graph(components, target) {
+  var deps  = this.dependencies(target);
+  var graph = {
+    nodes: {},
+    edges: []
+  };
+
+  // Conver deps in components.
+  deps = deps.map(function(dep) {
+    return {
+      instance: components.get(dep.name),
+      target:   dep.target
+    }
+  });
+
+  // Build the nodes map.
+  graph.nodes[this.name()] = {
+    colour: this.colour(),
+    label:  this.name()
+  };
+
+  deps.forEach(function(dep) {
+    var name = dep.instance.name();
+    graph.nodes[name] = {
+      colour: dep.instance.colour(),
+      label:  name
+    };
+  });
+
+  // Build the edges list.
+  var _this = this;
+  deps.forEach(function(dep) {
+    graph.edges.push({
+      colour: _this.colour(),
+      from: dep.instance.name(),
+      to:   _this.name()
+    });
+  });
+
+  // Done.
+  return graph;
 };
 
 /**
