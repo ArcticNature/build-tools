@@ -45,7 +45,8 @@ suite("CppComponent", function() {
         options: {
           root: "te/st/include",
           filter: [
-            "-runtime/indentation_namespace"
+            "-runtime/indentation_namespace",
+            "-whitesp-lineace/parens-line"
           ]
         },
         src: ["te/st/include/**/*.h", "te/st/src/**/*.cpp"]
