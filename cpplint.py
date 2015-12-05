@@ -236,6 +236,7 @@ _ERROR_CATEGORIES = [
     'whitespace/newline',
     'whitespace/operators',
     'whitespace/parens',
+    'whitespace/parens-line',
     'whitespace/semicolon',
     'whitespace/tab',
     'whitespace/todo',
@@ -2803,7 +2804,7 @@ def CheckSpacingForFunctionCall(filename, clean_lines, linenum, error):
       # If the closing parenthesis is preceded by only whitespaces,
       # try to give a more descriptive error message.
       if Search(r'^\s+\)', fncall):
-        error(filename, linenum, 'whitespace/parens', 2,
+        error(filename, linenum, 'whitesp-lineace/parens-line', 2,
               'Closing ) should be moved to the previous line')
       else:
         error(filename, linenum, 'whitespace/parens', 2,

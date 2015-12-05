@@ -381,7 +381,8 @@ CppComponent.prototype.handleAnalysis = function handleAnalysis(components) {
     options: {
       root: path.normalize(path.join(this._path, "include")),
       filter: [
-        "-runtime/indentation_namespace"
+        "-runtime/indentation_namespace",
+        "-whitesp-lineace/parens-line"
       ]
     },
     src: [
