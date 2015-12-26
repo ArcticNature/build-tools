@@ -78,7 +78,7 @@ Component.parseDependencyName = function parseDependencyName(name, target) {
   verify.notEmptyString(
       target, "The name of the current target must be a string"
   );
-  var parts = name.split("@");
+  var parts = name.split(".");
 
   // Target missing from name.
   if (parts.length === 1) {
