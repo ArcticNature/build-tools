@@ -11,6 +11,8 @@
  * grunt-contrib-clean task.
  */
 module.exports = function(grunt) {
+  var Component = require("../../components/component");
+
   /**
    * Clear all components.
    * @param {!Components} components The components collection to clear.
@@ -52,7 +54,7 @@ module.exports = function(grunt) {
     }
 
     var path = component.getCleanPath(target);
-    grunt.config("clean." + name + "\\." + target, path);
+    grunt.config("clean." + Component.escapeName(name) + "\\." + target, path);
     grunt.task.run("clean:" + component.name() + "." + target);
   };
 
