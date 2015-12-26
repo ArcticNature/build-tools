@@ -89,7 +89,8 @@ ScriptsComponent.prototype._handleScript = function _handleScript(
     );
   }
 
-  this._grunt.config("shell." + target + "\\." + this._name + "\\." + script, {
+  var key = Component.escapeName(this._name);
+  this._grunt.config("shell." + target + "\\." + key + "\\." + script, {
     command: command
   });
   this._grunt.task.run("shell:" + target + "." + this._name + "." + script);
@@ -112,10 +113,11 @@ ScriptsComponent.prototype._handleTask = function _handleTask(task, target) {
       "' does not name a multitask to configure."
   );
 
+  var key = Component.escapeName(this._name);
   var task_config = this._expandValue(target, config.config) || {};
   var task_name   = config.name;
   this._grunt.config(
-      task_name + "." + target + "\\." + this._name + "\\." + task,
+      task_name + "." + target + "\\." + key + "\\." + task,
       task_config
   );
   this._grunt.task.run(

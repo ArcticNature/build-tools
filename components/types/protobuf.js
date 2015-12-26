@@ -180,7 +180,7 @@ ProtoBuf.prototype.handleAnalysis = function handleAnalysis(components) {
 
 //@override
 ProtoBuf.prototype.handleTarget = function handleTarget(target, components) {
-  var key  = target + "\\." + this._name;
+  var key  = target + "\\." + Component.escapeName(this._name);
   var name = target + "." + this._name;
 
   // C++ related configuration.

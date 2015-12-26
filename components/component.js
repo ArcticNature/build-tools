@@ -66,6 +66,16 @@ var Component = module.exports = function Component(configuration) {
   }
 };
 
+/**
+ * Escapes dots in a name so that it can be used in a grunt
+ * configuration name.
+ *
+ * @param {!String} name The name to escape.
+ * @returns {!String} The escaped name.
+ */
+Component.escapeName = function escapeName(name) {
+  return name.replace(/\./g, "\\.");
+};
 
 /**
  * Parses a dependency name for a target.

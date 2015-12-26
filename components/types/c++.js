@@ -373,7 +373,7 @@ CppComponent.prototype.getStaticLibs = function getStaticLibs(target) {
 
 //Override
 CppComponent.prototype.handleAnalysis = function handleAnalysis(components) {
-  var key  = "analysis\\." + this._name;
+  var key  = "analysis\\." + Component.escapeName(this._name);
   var name = "analysis." + this._name;
 
   // Run linter.
@@ -434,7 +434,7 @@ CppComponent.prototype.handleAnalysis = function handleAnalysis(components) {
 CppComponent.prototype.handleTarget = function handleTarget(
     target, components
 ) {
-  var key  = target + "\\." + this._name;
+  var key  = target + "\\." + Component.escapeName(this._name);
   var name = target + "." + this._name;
 
   this._compileCore(key, name, target, components);

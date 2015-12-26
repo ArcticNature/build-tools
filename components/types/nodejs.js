@@ -242,7 +242,7 @@ NodeJS.prototype.getOutput = function getOutput(target) {
 
 //@override
 NodeJS.prototype.handleAnalysis = function handleAnalysis(components) {
-  var key  = "test\\." + this._name;
+  var key  = "test\\." + Component.escapeName(this._name);
   var name = "test." + this._name;
 
   this._copyTests(key, name);
@@ -253,7 +253,7 @@ NodeJS.prototype.handleAnalysis = function handleAnalysis(components) {
 
 //@override
 NodeJS.prototype.handleTarget = function handleTarget(target, components) {
-  var key  = target + "\\." + this._name;
+  var key  = target + "\\." + Component.escapeName(this._name);
   var name = target + "." + this._name;
 
   this._copySources(key, name, target);
