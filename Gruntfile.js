@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
-  var Components = require("./build-tools/components");
-  var GrHunter   = require("./build-tools/grhunter");
+  var Components = require("./components");
+  var GrHunter   = require("./grhunter");
   var grhunter   = new GrHunter(grunt);
 
   // Regiter modules to load.
