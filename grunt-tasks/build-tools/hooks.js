@@ -13,6 +13,11 @@ var CppComponent = require("../../components/types/c++");
 var post_clear = function post_clear(grunt) {
   grunt.config.requires("get-components");
   var register = grunt.config.get("get-components")("clear");
+  if (!register.has("daemon")) {
+    grunt.log.ok("Skipping modules link as daemon was not found!");
+    return;
+  }
+
   var daemon   = register.get("daemon");
   if (!(daemon instanceof CppComponent)) {
     throw new Error("Daemon module must be a C++ module");
