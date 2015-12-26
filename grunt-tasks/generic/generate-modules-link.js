@@ -32,6 +32,12 @@ module.exports = function(grunt) {
 
     grunt.config.requires("get-components");
     var components = grunt.config.get("get-components")(target);
+
+    if (!components.has("daemon")) {
+      grunt.log.ok("Skipping modules link as daemon was not found!");
+      return;
+    }
+
     var daemon = components.get("daemon");
     if (!(daemon instanceof CppComponent)) {
       throw new Error("Daemon module must be a C++ module");
