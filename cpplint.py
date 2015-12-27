@@ -997,6 +997,14 @@ class FileInfo(object):
     locations won't see bogus errors.
     """
     fullname = self.FullName()
+    
+    # If the --root flag was set, use that instead of trying
+    # to figure out the root of the repo.
+    if _root is not None:
+      root_dir = FileInfo(_root)
+      project_dir = os.path.dirname(fullname)
+      prefix = os.path.commonprefix([root_dir.FullName(), project_dir])
+      return fullname[len(prefix) + 1:]
 
     if os.path.exists(fullname):
       project_dir = os.path.dirname(fullname)
