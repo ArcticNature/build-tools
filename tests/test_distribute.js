@@ -51,7 +51,7 @@ suite("DistributionBuilder", function() {
       core: { core: "bin/core" },
       lib:  { lib:  "lib/lib" }
     };
-    this.options = {};
+    this.options = { repo_path: "./build-tools" };
 
     // Ready.
     this.builder = new DistributionBuilder(

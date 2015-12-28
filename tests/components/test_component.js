@@ -99,16 +99,16 @@ suite("Component", function() {
     });
 
     test("parse name with target returns that target", function() {
-      var dep = Component.parseDependencyName("debug.a", "test");
+      var dep = Component.parseDependencyName("debug@a", "test");
       assert.strictEqual(dep.name, "a");
       assert.strictEqual(dep.target, "debug");
     });
 
     test("parse name with malformed name fails", function() {
       var block = function() {
-        Component.parseDependencyName("a.b.c", "test");
+        Component.parseDependencyName("a@b@c", "test");
       };
-      assert.throws(block, /Cannot parse malformed dependency 'a.b.c'/);
+      assert.throws(block, /Cannot parse malformed dependency 'a@b@c'/);
     });
 
     test("check duplicates fails if a component has two targets", function() {
@@ -171,7 +171,7 @@ suite("Component", function() {
       var component = new Component({
         grunt: {},
         name:  "a",
-        deps:  ["a", "debug.e", "debug.f"],
+        deps:  ["a", "debug@e", "debug@f"],
         targets: {
           test: { deps: ["a", "b", "c"] }
         }

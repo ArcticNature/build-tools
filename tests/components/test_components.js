@@ -66,7 +66,7 @@ suite("Components", function() {
 
     test("confliction dependencies are detected", function() {
       this.add_component("a");
-      this.add_component("b", ["a", "release.c"]);
+      this.add_component("b", ["a", "release@c"]);
       this.add_component("c", [], ["b"]);
 
       var _this = this;
@@ -119,7 +119,7 @@ suite("Components", function() {
       this.components.add(new Component({
         grunt: {},
         name:  "b",
-        targets: { test: { deps: ["debug.a"] } }
+        targets: { test: { deps: ["debug@a"] } }
       }));
       this.components.add(new Component({
         grunt: {},
@@ -184,7 +184,7 @@ suite("Components", function() {
       this.components.add(new Component({
         grunt: {},
         name:  "b",
-        targets: { test: { deps: ["debug.a"] } }
+        targets: { test: { deps: ["debug@a"] } }
       }));
       this.components.add(new Component({
         grunt: {},
@@ -322,7 +322,7 @@ suite("Components", function() {
       this.components.add(new Component({
         grunt: {},
         name:  "a",
-        targets: { test: { deps: ["debug.b"] } }
+        targets: { test: { deps: ["debug@b"] } }
       }));
       this.components.add(new Component({
         grunt: {},

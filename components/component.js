@@ -223,7 +223,7 @@ Component.prototype.dependencies = function dependencies(name) {
   }
 
   var target = this._targets[name];
-  return target.deps;
+  return target.deps || [];
 };
 
 /**

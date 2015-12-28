@@ -1,32 +1,8 @@
 var path = require("path");
-var Git  = require("nodegit");
 var Promise = require("q");
 
 var Component = require("./components/component");
-
-/**
- * Get the sha for the latest commit on the current branch.
- * @param {!Promise} promise The promise chain to forward.
- * @returns {!Promise}
- *     A promise that resolves to the commit sha and the value returned
- *     by the given promise (which should be the archive name).
- */
-var get_commit_sha = function get_commit_sha(promise) {
-  return promise.then(function(continuation) {
-    return Git.Repository.open(".").then(function(repo) {
-      return repo;
-
-    }).then(function(repo) {
-      return repo.head().then(function(branch) {
-        return repo.getReferenceCommit(branch);
-      });
-
-    }).then(function(commit) {
-        continuation.sha = commit.sha();
-        return continuation;
-    });
-  });
-};
+var GitSha = require("./utils/git-sha");
 
 
 var DistributionBuilder = module.exports = function DistributionBuilder(
@@ -153,7 +129,7 @@ DistributionBuilder.prototype._processComponents = function _processComponents(
     grunt.log.verbose.ok();
   });
 
-  // Bundle pakcages directory if requested.
+  // Bundle packages directory if requested.
   // Always return a promise for consisteny.
   var promise = Promise({ archive_name: "packages" });
   if (options.bundle) {
@@ -166,7 +142,8 @@ DistributionBuilder.prototype._processComponents = function _processComponents(
 
     // Get the commit sha.
     if (options.bundle.version) {
-      promise = get_commit_sha(promise);
+      var repo_path = options.repo_path || ".";
+      promise = GitSha.get_commit_sha(promise, repo_path);
 
       // Shorten the hash if the user wants it.
       if (options.bundle.shorten_version) {

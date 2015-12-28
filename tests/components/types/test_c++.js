@@ -211,7 +211,7 @@ suite("CppComponent", function() {
     test("bin finds static libraries from deps", function() {
       var components = this.components;
       var component  = this.make({
-        targets: { debug: { type: "bin", deps: ["test.a"] } }
+        targets: { debug: { type: "bin", deps: ["test@a"] } }
       });
 
       components.add(this.make({
@@ -238,7 +238,7 @@ suite("CppComponent", function() {
       var components = this.components;
       var component  = this.make({
         libs: ["lua"],
-        targets: { debug: { type: "bin", deps: ["test.a"] } }
+        targets: { debug: { type: "bin", deps: ["test@a"] } }
       });
 
       components.add(this.make({
