@@ -61,7 +61,7 @@ TemplatesComponent.prototype._processTemplate = function _processTemplate(
   this._grunt.config(key, {
     files: [{
       src:  path.join(this._path, template),
-      dest: path.join("out", target, this._path, dest)
+      dest: path.join("out", "build", target, this._path, dest)
     }],
     options: {
       data: data
@@ -70,7 +70,7 @@ TemplatesComponent.prototype._processTemplate = function _processTemplate(
 };
 
 TemplatesComponent.prototype._templatePaths = function _templatePaths(target) {
-  var base_path = path.join("out", target, this._path);
+  var base_path = path.join("out", "build", target, this._path);
   return Object.keys(this._templates).map(function(file) {
     return path.join(base_path, file);
   });
@@ -79,7 +79,7 @@ TemplatesComponent.prototype._templatePaths = function _templatePaths(target) {
 
 // Override
 TemplatesComponent.prototype.getCleanPath = function getCleanPath(target) {
-  return path.join("out", target, this._path);
+  return path.join("out", "build", target, this._path);
 };
 
 // Override

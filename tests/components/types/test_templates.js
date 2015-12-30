@@ -39,7 +39,7 @@ suite("TemplatesComponent", function() {
       "temp/late/three": {}
     } });
 
-    assert.deepEqual(component.getCleanPath("debug"), "out/debug/test");
+    assert.deepEqual(component.getCleanPath("debug"), "out/build/debug/test");
   });
 
   test("get c++ headers", function() {
@@ -50,7 +50,7 @@ suite("TemplatesComponent", function() {
     } });
 
     assert.deepEqual(component.getCppHeaders("debug"), [
-      "out/debug/test/include"
+      "out/build/debug/test/include"
     ]);
   });
 
@@ -64,9 +64,9 @@ suite("TemplatesComponent", function() {
     assert.deepEqual(component.getOutput("debug"), {
       expand: true,
       src: [
-        "out/debug/test/template.h",
-        "out/debug/test/t2",
-        "out/debug/test/temp/late/three.h"
+        "out/build/debug/test/template.h",
+        "out/build/debug/test/t2",
+        "out/build/debug/test/temp/late/three.h"
       ]
     });
   });
@@ -91,7 +91,7 @@ suite("TemplatesComponent", function() {
         this.grunt.config("handlebars.test\\.debug\\.template\\.h"), {
           files: [{
             src:  "/test/template.hbs",
-            dest: "out/debug/test/template.h"
+            dest: "out/build/debug/test/template.h"
           }],
           options: { data: {
             __BUILD_TARGET__: "debug",
@@ -105,7 +105,7 @@ suite("TemplatesComponent", function() {
         this.grunt.config("handlebars.test\\.debug\\.temp/late/data"), {
           files: [{
             src:  "/test/data.hbs",
-            dest: "out/debug/test/temp/late/data"
+            dest: "out/build/debug/test/temp/late/data"
           }],
           options: { data: {
             __BUILD_TARGET__: "debug",
@@ -139,7 +139,7 @@ suite("TemplatesComponent", function() {
         this.grunt.config("handlebars.test\\.debug\\.template\\.h"), {
           files: [{
             src:  "/test/template.hbs",
-            dest: "out/debug/test/template.h"
+            dest: "out/build/debug/test/template.h"
           }],
           options: { data: {
             __BUILD_TARGET__: "debug",
@@ -174,7 +174,7 @@ suite("TemplatesComponent", function() {
         this.grunt.config("handlebars.test\\.debug\\.template\\.h"), {
           files: [{
             src:  "/test/template.hbs",
-            dest: "out/debug/test/template.h"
+            dest: "out/build/debug/test/template.h"
           }],
           options: { data: {
             __BUILD_TARGET__: "debug",
