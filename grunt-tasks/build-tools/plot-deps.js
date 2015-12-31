@@ -11,13 +11,12 @@ module.exports = function(grunt) {
     grunt.config.requires("get-components");
     var components = grunt.config.get("get-components")(target);
     var name = target;
-    var plot = "";
+    var plot = null;
 
     // Plot only the requested component.
     if (component) {
       name = name + "-" + component;
       plot = components.get(component).graph(components, target);
-      plot = graph.dot.convert(plot);
   
     // Or all of the known ones.
     } else {
@@ -25,13 +24,19 @@ module.exports = function(grunt) {
       var graphs = all.map(function(component) {
         return component.instance.graph(components, component.target);
       });
-      plot = graph.dot.convert(graph.merge(graphs));
+      plot = graph.merge(graphs);
     }
+
+    if (grunt.option("indirect")) {
+      plot = graph.indirect(plot);
+    }
+
+    var raw_data = graph.dot.convert(plot);
+    grunt.file.write("out/deps/" + name + ".dot", raw_data);
 
     if (grunt.option("no-write")) {
       return;
     }
-    grunt.file.write("out/deps/" + name + ".dot", plot);
 
     // Trun the task async and convert .dot file to format.
     var done   = this.async();

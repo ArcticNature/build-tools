@@ -56,4 +56,43 @@ suite("Graph", function() {
       });
     });
   });
+
+  suite("indirect", function() {
+    test("simple three node graph", function() {
+      var simple = graph.indirect({
+        edges: [{
+          from: "a",
+          to: "b"
+        }, {
+          from: "a",
+          to: "c"
+        }, {
+          from: "b",
+          to: "c"
+        }],
+        nodes: {
+          a: { colour: "#a", label: "A" },
+          b: { colour: "#b", label: "b" },
+          c: { colour: "#c", label: "c" }
+        }
+      });
+
+      assert.deepEqual({
+        edges: [{
+          from: "b",
+          to: "c",
+          colour: "#c"
+        }, {
+          from: "a",
+          to: "b",
+          colour: "#b"
+        }],
+        nodes: {
+          a: { colour: "#a", label: "A" },
+          b: { colour: "#b", label: "b" },
+          c: { colour: "#c", label: "c" }
+        }
+      }, simple);
+    });
+  });
 });
