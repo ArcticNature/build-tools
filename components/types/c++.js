@@ -23,6 +23,7 @@ var CppComponent = module.exports = function CppComponent(configuration) {
   Component.call(this, configuration);
 
   this._path  = configuration.path;
+  this._whole_archive = configuration["load-all-archives"] || false;
   this._types = {
     bin: this._compileBin,
     lib: this._compileLib
@@ -86,13 +87,14 @@ CppComponent.prototype._compileCore = function _compileCore(
  * @param {!Components} components Collection of components in the system.
  */
 CppComponent.prototype._compileBin = function _compileBin(
-    key, name, target, components, link_gtest
+    key, name, target, components
 ) {
   var bin_name  = this._name;
   var libraries = this._dynamicLibraries(components, target);
   var objects   = [path.join("out", "build", target, this._path, "**", "*.o")];
   var task_ext  = "bin";
 
+  var link_gtest = target === "test";
   if (link_gtest) {
     bin_name = "run-tests";
     libraries.push("pthread", "gcov");
@@ -108,7 +110,8 @@ CppComponent.prototype._compileBin = function _compileBin(
   objects.push.apply(objects, this._staticLibraries(components, target));
 
   this._grunt.config("link++." + key + "\\." + task_ext, {
-    libs:  libraries,
+    libs: libraries,
+    whole_archive: this._whole_archive,
     files: [{
       dest: path.join("out", "dist", target, this._path, bin_name),
       src:  objects
@@ -442,6 +445,6 @@ CppComponent.prototype.handleTarget = function handleTarget(
 
   if (target === "test") {
     this._compileGTest(key, name);
-    this._compileBin(key, name, target, components, true);
+    this._compileBin(key, name, target, components);
   }
 };

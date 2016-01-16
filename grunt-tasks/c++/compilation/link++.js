@@ -15,7 +15,8 @@ module.exports = function(grunt) {
       debug: true,
       libs:  null,
       coverage: true,
-      optimise: null
+      optimise: null,
+      whole_archive: false
     }, this.data);
 
     // Find files to process.
@@ -66,9 +67,15 @@ module.exports = function(grunt) {
         }));
       }
 
-      // Source files.
+      // More options.
       args.push("-o", path.normalize(source.dest));
+      extend_args(args, options.whole_archive, ["-Wl,--whole-archive"]);
+
+      // Source files.
       args.push.apply(args, source.src);
+      extend_args(args, options.whole_archive, ["-Wl,--no-whole-archive"]);
+
+      // Run the command.
       children.push(new SubProcess(grunt.log, {
         args: args,
         cmd:  "g++"
