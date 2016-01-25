@@ -147,7 +147,7 @@ CppComponent.prototype._compileLib = function _compileLib(
   this._grunt.config("ar." + key + "\\.lib", {
     files: [{
       dest: path.join("out", "dist", target, this._path, this._name + ".a"),
-      src:  path.join("out", "build", target, this._path, "**", "*.o")
+      src:  path.join("out", "build", target, this._path, "src", "**", "*.o")
     }]
   });
   this._grunt.task.run("ar:" + name + ".lib");
