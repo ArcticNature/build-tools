@@ -46,6 +46,7 @@ suite("CppComponent", function() {
           root: "te/st/include",
           filter: [
             "-runtime/indentation_namespace",
+            "-whitespace/blank_line",
             "-whitesp-lineace/parens-line"
           ]
         },
@@ -201,6 +202,7 @@ suite("CppComponent", function() {
       ]);
       assert.deepEqual(this.grunt.config("link++.debug\\.test\\.bin"), {
         libs: [],
+        whole_archive: false,
         files: [{
           dest: "out/dist/debug/te/st/test",
           src:  ["out/build/debug/te/st/**/*.o"]
@@ -227,6 +229,7 @@ suite("CppComponent", function() {
       ]);
       assert.deepEqual(this.grunt.config("link++.debug\\.test\\.bin"), {
         libs: [],
+        whole_archive: false,
         files: [{
           dest: "out/dist/debug/te/st/test",
           src:  ["out/build/debug/te/st/**/*.o", "out/dist/test/te/st/a.a"]
@@ -238,12 +241,14 @@ suite("CppComponent", function() {
       var components = this.components;
       var component  = this.make({
         libs: ["lua"],
+        whole_archive: false,
         targets: { debug: { type: "bin", deps: ["test@a"] } }
       });
 
       components.add(this.make({
         name: "a",
         libs: ["gflags"],
+        whole_archive: false,
         targets: { test: { type: "lib" } }
       }));
 
@@ -255,6 +260,7 @@ suite("CppComponent", function() {
       ]);
       assert.deepEqual(this.grunt.config("link++.debug\\.test\\.bin"), {
         libs: ["gflags", "lua"],
+        whole_archive: false,
         files: [{
           dest: "out/dist/debug/te/st/test",
           src:  ["out/build/debug/te/st/**/*.o", "out/dist/test/te/st/a.a"]
@@ -291,7 +297,7 @@ suite("CppComponent", function() {
       assert.deepEqual(this.grunt.config("ar.debug\\.test\\.lib"), {
         files: [{
           dest: "out/dist/debug/te/st/test.a",
-          src:  "out/build/debug/te/st/**/*.o"
+          src:  "out/build/debug/te/st/src/**/*.o"
         }]
       });
     });
@@ -306,7 +312,7 @@ suite("CppComponent", function() {
       component.handleTarget("test", components);
 
       this.grunt.task.assertTaskQueue([
-        "g++:test.test.core", "link++:test.test.bin",
+        "g++:test.test.core", "link++:test.test.gtest",
         "g++:test.test.gtest", "link++:test.test.gtest"
       ]);
       assert.deepEqual(this.grunt.config("g++.test\\.test\\.gtest"), {
@@ -321,6 +327,7 @@ suite("CppComponent", function() {
       });
       assert.deepEqual(this.grunt.config("link++.test\\.test\\.gtest"), {
         libs: ["pthread", "gcov"],
+        whole_archive: false,
         files: [{
           dest: "out/dist/test/te/st/run-tests",
           src:  [

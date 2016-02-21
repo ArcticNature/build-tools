@@ -182,6 +182,7 @@ ScriptsComponent.prototype._process_targets = function _process_targets(
  * @returns {!String|!Array.<!String>} The expanded array/string.
  */
 ScriptsComponent.prototype._template = function _template(template, target) {
+  var _this = this;
   var grunt = this._grunt;
   var data  = {
     path: this._path,
@@ -191,8 +192,21 @@ ScriptsComponent.prototype._template = function _template(template, target) {
   // If we are expanding an array, process each item.
   if (Array.isArray(template)) {
     return template.map(function(element) {
-      return grunt.template.process(element, { data: data });
+      return _this._template(element, target);
     });
+  }
+
+  // If we are expanding an object process each attribute.
+  if (template !== null && typeof template === "object") {
+    var obj = {};
+    Object.keys(template).forEach(function(key) {
+      if (typeof template[key] === "string") {
+        obj[key] = _this._template(template[key], target);
+      } else {
+        obj[key] = template[key];
+      }
+    });
+    return obj;
   }
 
   // Otherwise just process the template.
@@ -212,7 +226,7 @@ ScriptsComponent.prototype._validate = function _validate(configuration) {
     clear_path.forEach(function (path) {
       verify.notEmptyString(path, "Component clear-path contains invalid path");
     });
-  } else {
+  } else if (clear_path === null || typeof clear_path !== "object") {
     verify.notEmptyString(clear_path, "Component clear-path not valid");
   }
 };
@@ -242,7 +256,7 @@ _validateTaskOrScript(task_or_script) {
 //@override
 ScriptsComponent.prototype.getCppHeaders = function getCppHeaders(target) {
   if (this._include_path) {
-    return this._include_path;
+    return this._template(this._include_path, target);
   }
   return [path.join(this._path, "include")];
 };
@@ -254,12 +268,12 @@ ScriptsComponent.prototype.getCleanPath = function getCleanPath(target) {
 
 //@override
 ScriptsComponent.prototype.getDynamicLibs = function getDynamicLibs(target) {
-  return this._dynamic_libs;
+  return this._template(this._dynamic_libs, target);
 };
 
 //@override
 ScriptsComponent.prototype.getStaticLibs = function getStaticLibs(target) {
-  return this._static_libs;
+  return this._template(this._static_libs, target);
 };
 
 //@override
