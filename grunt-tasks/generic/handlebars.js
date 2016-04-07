@@ -33,7 +33,7 @@ var make_environment = function make_environment(grunt) {
         options = precision;
         precision = 8;
       }
-      return sha.substr(0, precision);
+      return precision == 0 ? sha : sha.substr(0, precision);
     });
 
     return env;
