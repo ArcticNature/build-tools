@@ -1,3 +1,9 @@
+// Cache expire after 30 days (in milliseconds).
+//var COMPONENTS_CACHE_EXPIRE = 30 * 24 * 60 * 60 * 1000;
+// Cache never expires.
+var COMPONENTS_CACHE_EXPIRE = -1;
+var COMPONENTS_CACHE_PATH = ".components.cache.json";
+
 var assert = require("assert");
 var fs   = require("fs");
 var path = require("path");
@@ -65,12 +71,31 @@ index.getComponents = function getComponents(grunt, target) {
   var components_definitions = null;
   var count = 0;
 
-  grunt.log.write("Scanning working directory for components ... ");
-  components_definitions = grunt.file.expand([
-    "**/component.json",
-    "!**/node_modules/**"
-  ]);
-  grunt.log.ok();
+  // Check for cached definition files.
+  var cacheValid = false;
+  if (grunt.file.exists(COMPONENTS_CACHE_PATH)) {
+    var cacheStats = fs.statSync(COMPONENTS_CACHE_PATH);
+    var now = Date.now();
+    var delta = now - cacheStats.mtime.getTime();
+    cacheValid = (
+      delta < COMPONENTS_CACHE_EXPIRE ||
+      COMPONENTS_CACHE_EXPIRE === -1
+    );
+  }
+
+  if (cacheValid) {
+    grunt.log.write("Using components cache ... ");
+    components_definitions = grunt.file.readJSON(COMPONENTS_CACHE_PATH);
+    grunt.log.ok();
+
+  } else {
+    grunt.log.write("Scanning working directory for components ... ");
+    components_definitions = grunt.file.expand([
+      "**/component.json",
+      "!**/node_modules/**"
+    ]);
+    grunt.log.ok();
+  }
 
   components_definitions.forEach(function(file) {
     grunt.log.verbose.writeln(file);
@@ -107,6 +132,13 @@ index.getComponents = function getComponents(grunt, target) {
   grunt.log.write("Injecting dependencies and verifing configuration ... ");
   components.inject();
   components.verify();
+  grunt.log.ok();
+
+  // Update/create cache file.
+  grunt.log.write("Updating component cache ... ");
+  grunt.file.write(
+    COMPONENTS_CACHE_PATH, JSON.stringify(components_definitions)
+  );
   grunt.log.ok();
 
   components_singleton = components;
