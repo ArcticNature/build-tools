@@ -425,8 +425,9 @@ CppComponent.prototype.handleAnalysis = function handleAnalysis(components) {
   this._grunt.task.run("shell:" + name);
 
   // Run coverage.
+  var src_path = path.join(this._path, "(include|src)");
   this._grunt.config("gcovr." + key, {
-    exclude: ".*(3rd-parties|tests).*",
+    filter: ".*" + src_path + ".*",
     gcovr:   GCOVR_PATH,
     objects: path.join("out", "build", "test", this._path, "src"),
     save_to: path.join("out", "reports", this._path, "coverage.xml")

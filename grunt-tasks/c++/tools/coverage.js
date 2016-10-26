@@ -3,6 +3,7 @@ module.exports = function(grunt) {
   var DEFAULT_OPTIONS = {
     cwd: null,
     exclude: null,
+    filter:  null,
     gcovr:   "./gcovr",
     root:    ".",
     save_to: "coverage.xml",
@@ -27,6 +28,9 @@ module.exports = function(grunt) {
     ];
     if (options.exclude) {
       args.push("--exclude=" + options.exclude);
+    }
+    if (options.filter) {
+      args.push("--filter=" + options.filter);
     }
 
     var done  = this.async();
