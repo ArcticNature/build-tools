@@ -12,7 +12,7 @@ module.exports = function(grunt) {
           return fs.statSync(input).mtime.getTime();
         }));
         var target = fs.statSync(path.normalize(source.dest)).mtime.getTime();
-        return oldest >= target;
+        return oldest > target;
 
       } catch(ex) { /* NOOP */ }
       return true;

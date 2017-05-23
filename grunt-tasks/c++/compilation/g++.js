@@ -60,7 +60,7 @@ module.exports = function(grunt) {
       try {
         var src    = fs.statSync(source.src[0]).mtime.getTime();
         var target = fs.statSync(source.dest).mtime.getTime();
-        return Math.max(src, include_last_modified) >= target;
+        return Math.max(src, include_last_modified) > target;
 
       } catch(ex) { /* NOOP */ }
       return true;
