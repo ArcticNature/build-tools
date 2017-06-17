@@ -23,7 +23,7 @@ module.exports = function(grunt) {
 
     // Run make.
     var args = [
-      "--xml", "--root=" + options.root,
+      "--branches", "--xml", "--root=" + options.root,
       "--object-directory=" + options.objects
     ];
     if (options.exclude) {
